@@ -1,0 +1,16 @@
+{
+  "name": "membrane",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "tsc && node scripts/copy-static.js",
+    "test": ".venv\\Scripts\\python.exe -m unittest discover -s tests",
+    "backend": ".venv\\Scripts\\python.exe scripts\\run_backend.py",
+    "check:python": ".venv\\Scripts\\python.exe -m py_compile api/core.py api/index.py",
+    "check": "npm run build && npm test && npm run check:python"
+  },
+  "devDependencies": {
+    "@types/chrome": "^0.0.287",
+    "typescript": "^5.7.2"
+  }
+}
