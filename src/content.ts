@@ -1,8 +1,23 @@
-import { SUPPORTED_HOSTS } from "./config.js";
-import type { RuntimeRequest, RuntimeResponse } from "./types.js";
-
 const BUTTON_ID = "membrane-save-context";
 const MIN_CAPTURE_CHARS = 100;
+const SUPPORTED_HOSTS = [
+  "chatgpt.com",
+  "chat.openai.com",
+  "claude.ai",
+  "www.perplexity.ai",
+  "perplexity.ai",
+];
+
+type RuntimeRequest =
+  | { type: "CAPTURE_CONTEXT"; rawChat: string }
+  | { type: "INJECT_CONTEXT"; content: string }
+  | { type: "CAPTURE_VISIBLE_CHAT" };
+
+interface RuntimeResponse<T = unknown> {
+  ok: boolean;
+  data?: T;
+  error?: string;
+}
 
 function isSupportedHost(host = window.location.hostname): boolean {
   return SUPPORTED_HOSTS.includes(host);
@@ -140,23 +155,8 @@ function injectButton(): void {
     font: "600 13px system-ui, sans-serif",
   });
 
-  button.addEventListener("click", async () => {
-    button.textContent = "Saving...";
-    button.setAttribute("disabled", "true");
-    try {
-      const rawChat = scrapeChat();
-      if (rawChat.length < MIN_CAPTURE_CHARS) {
-        toast("Could not find chat content");
-        return;
-      }
-      await sendRuntime({ type: "CAPTURE_CONTEXT", rawChat });
-      toast("Context saved");
-    } catch {
-      toast("Could not save context");
-    } finally {
-      button.textContent = "Save Context";
-      button.removeAttribute("disabled");
-    }
+  button.addEventListener("click", () => {
+    void captureVisibleChat(button);
   });
 
   document.body.appendChild(button);
@@ -239,6 +239,17 @@ First, acknowledge you understand this context. Then wait for my next instructio
 }
 
 chrome.runtime.onMessage.addListener((request: RuntimeRequest, _sender, sendResponse) => {
+  if (request.type === "CAPTURE_VISIBLE_CHAT") {
+    void captureVisibleChat().then(
+      () => sendResponse({ ok: true, data: true }),
+      (error: unknown) => {
+        const message = error instanceof Error ? error.message : "Could not save context";
+        sendResponse({ ok: false, error: message });
+      },
+    );
+    return true;
+  }
+
   if (request.type !== "INJECT_CONTEXT") {
     return false;
   }
@@ -267,3 +278,29 @@ chrome.runtime.onMessage.addListener((request: RuntimeRequest, _sender, sendResp
 });
 
 injectButton();
+
+async function captureVisibleChat(button?: HTMLButtonElement): Promise<void> {
+  button?.setAttribute("disabled", "true");
+  if (button) {
+    button.textContent = "Saving...";
+  }
+  try {
+    const rawChat = scrapeChat();
+    if (rawChat.length < MIN_CAPTURE_CHARS) {
+      toast("Could not find chat content");
+      throw new Error("Could not find chat content");
+    }
+    await sendRuntime({ type: "CAPTURE_CONTEXT", rawChat });
+    toast("Context saved");
+  } catch (error) {
+    if (!(error instanceof Error && error.message === "Could not find chat content")) {
+      toast("Could not save context");
+    }
+    throw error;
+  } finally {
+    if (button) {
+      button.textContent = "Save Context";
+      button.removeAttribute("disabled");
+    }
+  }
+}

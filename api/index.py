@@ -5,6 +5,7 @@ import os
 from typing import Any
 
 import httpx
+from dotenv import load_dotenv
 from fastapi import FastAPI, Header, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -21,6 +22,7 @@ from api.core import (
 
 logger = logging.getLogger("membrane")
 logging.basicConfig(level=logging.INFO)
+load_dotenv()
 
 
 class CaptureRequest(BaseModel):

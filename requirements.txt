@@ -1,5 +1,6 @@
 fastapi>=0.127.0,<1
 httpx>=0.28.1,<1
 pydantic>=2.12.4,<3
+python-dotenv>=1.2.1,<2
 supabase>=2.30.0,<3
 uvicorn>=0.38.0,<1

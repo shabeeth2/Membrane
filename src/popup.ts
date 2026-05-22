@@ -4,6 +4,7 @@ import type { ContextDetail, ContextSummary, RuntimeResponse } from "./types.js"
 const statusEl = document.getElementById("status") as HTMLParagraphElement;
 const contextsEl = document.getElementById("contexts") as HTMLDivElement;
 const refreshButton = document.getElementById("refresh") as HTMLButtonElement;
+const saveCurrentButton = document.getElementById("save-current") as HTMLButtonElement;
 
 function setStatus(message: string): void {
   statusEl.textContent = message;
@@ -60,6 +61,32 @@ async function injectContext(id: number): Promise<void> {
   setStatus("Context injected");
 }
 
+async function saveCurrentChat(): Promise<void> {
+  const supported = await activeTabSupported();
+  if (!supported) {
+    setStatus("Unsupported site");
+    return;
+  }
+
+  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  if (!tab?.id) {
+    setStatus("Unsupported site");
+    return;
+  }
+
+  saveCurrentButton.disabled = true;
+  setStatus("Saving...");
+  try {
+    await chrome.tabs.sendMessage(tab.id, { type: "CAPTURE_VISIBLE_CHAT" });
+    setStatus("Context saved");
+    await loadContexts();
+  } catch {
+    setStatus("Could not save context");
+  } finally {
+    saveCurrentButton.disabled = false;
+  }
+}
+
 function renderContexts(contexts: ContextSummary[]): void {
   contextsEl.replaceChildren();
   if (contexts.length === 0) {
@@ -104,6 +131,10 @@ async function loadContexts(): Promise<void> {
 
 refreshButton.addEventListener("click", () => {
   void loadContexts();
+});
+
+saveCurrentButton.addEventListener("click", () => {
+  void saveCurrentChat();
 });
 
 void loadContexts();

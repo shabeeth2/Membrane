@@ -41,6 +41,13 @@ button {
   font-size: 12px;
 }
 
+#save-current {
+  width: 100%;
+  min-height: 38px;
+  margin-top: 12px;
+  font-weight: 650;
+}
+
 #status {
   min-height: 20px;
   margin: 10px 0;
