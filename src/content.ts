@@ -9,6 +9,31 @@ function isSupportedHost(host = window.location.hostname): boolean {
   return SUPPORTED_HOSTS.includes(host);
 }
 
+function currentSite(host = window.location.hostname): "chatgpt" | "claude" | "perplexity" | "gemini" | "copilot" | "grok" | "mistral" | "unknown" {
+  if (host === "chatgpt.com" || host === "chat.openai.com") {
+    return "chatgpt";
+  }
+  if (host === "claude.ai") {
+    return "claude";
+  }
+  if (host === "www.perplexity.ai" || host === "perplexity.ai") {
+    return "perplexity";
+  }
+  if (host === "gemini.google.com" || host === "bard.google.com") {
+    return "gemini";
+  }
+  if (host === "copilot.microsoft.com") {
+    return "copilot";
+  }
+  if (host === "grok.com") {
+    return "grok";
+  }
+  if (host === "chat.mistral.ai") {
+    return "mistral";
+  }
+  return "unknown";
+}
+
 function toast(message: string, tone: "neutral" | "success" | "error" = "neutral"): void {
   const existing = document.getElementById("membrane-toast");
   existing?.remove();
@@ -83,24 +108,56 @@ function scrapeChat(): string {
   const host = window.location.hostname;
   let text = "";
 
-  if (host === "chatgpt.com" || host === "chat.openai.com") {
+  const site = currentSite(host);
+
+  if (site === "chatgpt") {
     text = extractBySelectors([
       '[data-testid^="conversation-turn-"]',
       "[data-message-author-role]",
       "main article",
     ]);
-  } else if (host === "claude.ai") {
+  } else if (site === "claude") {
     text = extractBySelectors([
       '[data-testid*="message"]',
       '[data-test-id*="message"]',
       "main [class*='message']",
       "main",
     ]);
-  } else if (host === "www.perplexity.ai" || host === "perplexity.ai") {
+  } else if (site === "perplexity") {
     text = extractBySelectors([
       "main [data-testid]",
       "main article",
       "main [class*='answer']",
+      "main",
+    ]);
+  } else if (site === "gemini") {
+    text = extractBySelectors([
+      "message-content",
+      "model-response",
+      "user-query",
+      "chat-window [class*='message']",
+      "main",
+    ]);
+  } else if (site === "copilot") {
+    text = extractBySelectors([
+      '[data-content="conversation"]',
+      '[data-testid*="message"]',
+      "cib-message",
+      "main [class*='message']",
+      "main",
+    ]);
+  } else if (site === "grok") {
+    text = extractBySelectors([
+      '[data-testid*="message"]',
+      "main [class*='message']",
+      "main article",
+      "main",
+    ]);
+  } else if (site === "mistral") {
+    text = extractBySelectors([
+      '[data-testid*="message"]',
+      "main [class*='message']",
+      "main article",
       "main",
     ]);
   }
@@ -151,68 +208,186 @@ function injectButton(): void {
   document.body.appendChild(button);
 }
 
-function importIconSvg(): string {
-  return `
-    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-      <rect x="4" y="5" width="11" height="14" rx="3" fill="none" stroke="currentColor" stroke-width="1.8"/>
-      <path d="M10 12h8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-      <path d="m15 9 3 3-3 3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-      <path d="M7.5 8.5h4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity=".65"/>
-      <path d="M7.5 15.5h4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity=".65"/>
-    </svg>
-  `;
+function visibleElement(element: Element | null): HTMLElement | null {
+  if (!(element instanceof HTMLElement)) {
+    return null;
+  }
+  const rect = element.getBoundingClientRect();
+  const style = window.getComputedStyle(element);
+  if (rect.width <= 0 || rect.height <= 0 || style.visibility === "hidden" || style.display === "none") {
+    return null;
+  }
+  return element;
 }
 
-function nearestComposerContainer(input: HTMLElement): HTMLElement {
-  const selectors = [
+function firstVisible(selectors: string[], root: ParentNode = document): HTMLElement | null {
+  for (const selector of selectors) {
+    const elements = Array.from(root.querySelectorAll(selector));
+    for (const element of elements) {
+      const visible = visibleElement(element);
+      if (visible) {
+        return visible;
+      }
+    }
+  }
+  return null;
+}
+
+function closestVisible(input: HTMLElement, selectors: string[]): HTMLElement | null {
+  for (const selector of selectors) {
+    const container = visibleElement(input.closest(selector));
+    if (container) {
+      return container;
+    }
+  }
+  return null;
+}
+
+function evaluateXPath(path: string): HTMLElement | null {
+  const result = document.evaluate(path, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
+  return visibleElement(result.singleNodeValue as Element | null);
+}
+
+function containsImportButton(element: HTMLElement): boolean {
+  return Boolean(element.querySelector(`#${IMPORT_BUTTON_ID}`));
+}
+
+function resetImportButtonPlacement(button: HTMLButtonElement): void {
+  Object.assign(button.style, {
+    position: "",
+    inset: "",
+    right: "",
+    bottom: "",
+    margin: "",
+    transform: "",
+  });
+}
+
+function attachInFlow(button: HTMLButtonElement, target: HTMLElement, before: Element | null = null): boolean {
+  if (target === button) {
+    return false;
+  }
+  if (target.contains(button)) {
+    resetImportButtonPlacement(button);
+    return true;
+  }
+  if (containsImportButton(target)) {
+    return false;
+  }
+  resetImportButtonPlacement(button);
+  if (before && before.parentElement === target) {
+    target.insertBefore(button, before);
+  } else if (!target.contains(button)) {
+    target.appendChild(button);
+  }
+  return true;
+}
+
+function attachFixed(button: HTMLButtonElement, input?: HTMLElement): void {
+  if (!document.body.contains(button)) {
+    document.body.appendChild(button);
+  }
+  const inputRect = input?.getBoundingClientRect();
+  Object.assign(button.style, {
+    position: "fixed",
+    right: inputRect ? Math.max(18, Math.round(window.innerWidth - inputRect.right + 44)) + "px" : "18px",
+    bottom: inputRect ? Math.max(18, Math.round(window.innerHeight - inputRect.bottom + 8)) + "px" : "18px",
+    margin: "0",
+    transform: "",
+  });
+}
+
+function placeGeminiButton(button: HTMLButtonElement, input: HTMLElement): boolean {
+  const quickCompose = firstVisible(["sider-quick-compose-btn", "bard-sidenav-content sider-quick-compose-btn"]);
+  if (quickCompose?.parentElement && attachInFlow(button, quickCompose.parentElement, quickCompose)) {
+    return true;
+  }
+
+  const xpathTarget = evaluateXPath(
+    "/html/body/chat-app/main/side-navigation-v2/bard-sidenav-container/bard-sidenav-content/div/div/div/chat-window/div/input-container/fieldset/input-area-v2/div/div/div[1]/div/div/div/rich-textarea/sider-quick-compose-btn",
+  );
+  if (xpathTarget?.parentElement && attachInFlow(button, xpathTarget.parentElement, xpathTarget)) {
+    return true;
+  }
+
+  const inputArea = visibleElement(input.closest("input-container, input-area-v2, fieldset"));
+  const actionRow = firstVisible([
+    "[class*='quick']",
+    "[class*='action']",
+    "[class*='toolbar']",
+  ], inputArea || document);
+  if (actionRow && attachInFlow(button, actionRow)) {
+    return true;
+  }
+
+  return false;
+}
+
+function placeByNativeControls(button: HTMLButtonElement, input: HTMLElement): boolean {
+  const site = currentSite();
+
+  if (site === "gemini" && placeGeminiButton(button, input)) {
+    return true;
+  }
+
+  const siteSelectors: Record<string, string[]> = {
+    chatgpt: [
+      '[data-testid="composer-footer-actions"]',
+      '[data-testid*="composer"] [class*="items-center"]',
+    ],
+    claude: [
+      '[data-testid*="composer"] [class*="button"]',
+      '[class*="composer"] [class*="actions"]',
+    ],
+    perplexity: [
+      'main form [class*="items-center"]',
+      '[class*="composer"] [class*="items-center"]',
+    ],
+    copilot: [
+      'form [class*="actions"]',
+      'form [class*="toolbar"]',
+      '[class*="composer"] [class*="actions"]',
+    ],
+    grok: [
+      'form [class*="items-center"]',
+      '[class*="composer"] [class*="items-center"]',
+    ],
+    mistral: [
+      'form [class*="items-center"]',
+      '[class*="composer"] [class*="actions"]',
+    ],
+    unknown: [],
+  };
+
+  const container = closestVisible(input, [
     "form",
     '[data-testid*="composer"]',
     '[data-testid*="prompt"]',
     '[class*="composer"]',
     '[class*="prompt"]',
     '[class*="input"]',
-  ];
-
-  for (const selector of selectors) {
-    const container = input.closest<HTMLElement>(selector);
-    if (container) {
-      return container;
-    }
+  ]) || input.parentElement;
+  const actionRow = firstVisible(siteSelectors[site] || [], container || document);
+  if (actionRow && attachInFlow(button, actionRow)) {
+    return true;
   }
 
-  return input.parentElement || input;
+  if (container && attachInFlow(button, container)) {
+    const style = window.getComputedStyle(container);
+    if (style.display !== "flex" && style.display !== "inline-flex") {
+      button.style.marginLeft = "8px";
+    }
+    return true;
+  }
+
+  return false;
 }
 
 function placeImportButton(button: HTMLButtonElement, input: HTMLElement): void {
-  const container = nearestComposerContainer(input);
-  const containerRect = container.getBoundingClientRect();
-  const inputRect = input.getBoundingClientRect();
-
-  if (containerRect.width > 0 && containerRect.height > 0) {
-    const style = window.getComputedStyle(container);
-    if (style.position === "static") {
-      container.style.position = "relative";
-    }
-    if (!container.contains(button)) {
-      container.appendChild(button);
-    }
-
-    Object.assign(button.style, {
-      position: "absolute",
-      right: "44px",
-      bottom: Math.max(8, Math.round(containerRect.bottom - inputRect.bottom + 8)) + "px",
-    });
+  if (placeByNativeControls(button, input)) {
     return;
   }
-
-  if (!document.body.contains(button)) {
-    document.body.appendChild(button);
-  }
-  Object.assign(button.style, {
-    position: "fixed",
-    right: Math.max(18, Math.round(window.innerWidth - inputRect.right + 44)) + "px",
-    bottom: Math.max(18, Math.round(window.innerHeight - inputRect.bottom + 8)) + "px",
-  });
+  attachFixed(button, input);
 }
 
 function createImportButton(): HTMLButtonElement {
@@ -221,7 +396,16 @@ function createImportButton(): HTMLButtonElement {
   button.type = "button";
   button.title = "Open Membrane";
   button.setAttribute("aria-label", "Open Membrane");
-  button.innerHTML = importIconSvg();
+  const icon = document.createElement("img");
+  icon.alt = "";
+  icon.src = chrome.runtime.getURL("assets/logo.png");
+  Object.assign(icon.style, {
+    width: "18px",
+    height: "18px",
+    display: "block",
+    pointerEvents: "none",
+  });
+  button.replaceChildren(icon);
   Object.assign(button.style, {
     zIndex: "2147483647",
     width: "32px",
@@ -238,15 +422,6 @@ function createImportButton(): HTMLButtonElement {
     cursor: "pointer",
     transition: "background 160ms ease, border-color 160ms ease, color 160ms ease",
   });
-
-  const icon = button.querySelector("svg");
-  if (icon) {
-    Object.assign((icon as SVGElement).style, {
-      width: "18px",
-      height: "18px",
-      display: "block",
-    });
-  }
 
   button.addEventListener("mouseenter", () => {
     button.style.background = "#ccfbf1";
@@ -298,10 +473,13 @@ function injectImportButton(): void {
 
 function findInput(): HTMLElement | null {
   const selectors = [
+    "rich-textarea",
     "textarea",
     '[contenteditable="true"]',
     '[role="textbox"]',
     "div.ProseMirror",
+    '[class*="ProseMirror"]',
+    '[class*="composer"] [contenteditable]',
   ];
   for (const selector of selectors) {
     const elements = Array.from(document.querySelectorAll<HTMLElement>(selector));

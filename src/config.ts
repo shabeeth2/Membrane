@@ -6,4 +6,9 @@ export const SUPPORTED_HOSTS = [
   "claude.ai",
   "www.perplexity.ai",
   "perplexity.ai",
+  "gemini.google.com",
+  "bard.google.com",
+  "copilot.microsoft.com",
+  "grok.com",
+  "chat.mistral.ai",
 ];
