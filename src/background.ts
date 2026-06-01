@@ -30,6 +30,8 @@ async function handleMessage(request: RuntimeRequest, sender: chrome.runtime.Mes
         throw new Error("Unsupported site");
       }
       return chrome.tabs.sendMessage(sender.tab.id, request);
+    case "OPEN_POPUP":
+      return chrome.action.openPopup();
     default:
       throw new Error("Unsupported request");
   }

@@ -3,6 +3,7 @@ import type { ContextDetail, ContextSummary, RuntimeResponse } from "./types.js"
 
 const statusEl = document.getElementById("status") as HTMLParagraphElement;
 const contextsEl = document.getElementById("contexts") as HTMLDivElement;
+const emptyStateEl = document.getElementById("empty-state") as HTMLDivElement;
 const refreshButton = document.getElementById("refresh") as HTMLButtonElement;
 const saveCurrentButton = document.getElementById("save-current") as HTMLButtonElement;
 
@@ -90,9 +91,10 @@ async function saveCurrentChat(): Promise<void> {
 function renderContexts(contexts: ContextSummary[]): void {
   contextsEl.replaceChildren();
   if (contexts.length === 0) {
-    setStatus("No contexts yet");
+    emptyStateEl.style.display = "flex";
     return;
   }
+  emptyStateEl.style.display = "none";
 
   for (const context of contexts) {
     const row = document.createElement("button");
@@ -118,6 +120,8 @@ function renderContexts(contexts: ContextSummary[]): void {
 
 async function loadContexts(): Promise<void> {
   setStatus("Loading...");
+  contextsEl.replaceChildren();
+  emptyStateEl.style.display = "none";
   try {
     const contexts = await sendRuntime<ContextSummary[]>({ type: "LIST_CONTEXTS" });
     renderContexts(contexts);

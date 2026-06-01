@@ -18,7 +18,8 @@ export type RuntimeRequest =
   | { type: "GET_CONTEXT"; id: number }
   | { type: "CAPTURE_CONTEXT"; rawChat: string }
   | { type: "INJECT_CONTEXT"; content: string }
-  | { type: "CAPTURE_VISIBLE_CHAT" };
+  | { type: "CAPTURE_VISIBLE_CHAT" }
+  | { type: "OPEN_POPUP" };
 
 export interface RuntimeResponse<T = unknown> {
   ok: boolean;

@@ -1,84 +1,225 @@
 * {
   box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --teal-50: #f0fdfa;
+  --teal-100: #ccfbf1;
+  --teal-200: #99f6e4;
+  --teal-300: #5eead4;
+  --teal-400: #2dd4bf;
+  --teal-500: #14b8a6;
+  --teal-600: #0d9488;
+  --teal-700: #0f766e;
+  --teal-800: #115e59;
+  --teal-900: #134e4a;
+  --slate-50: #f8fafc;
+  --slate-100: #f1f5f9;
+  --slate-200: #e2e8f0;
+  --slate-300: #cbd5e1;
+  --slate-400: #94a3b8;
+  --slate-500: #64748b;
+  --slate-600: #475569;
+  --slate-700: #334155;
+  --slate-800: #1e293b;
+  --slate-900: #0f172a;
+  --red-500: #ef4444;
+  --red-600: #dc2626;
+  --green-600: #059669;
 }
 
 body {
-  width: 340px;
-  margin: 0;
-  color: #1f2328;
-  background: #ffffff;
-  font: 14px/1.4 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  width: 360px;
+  color: var(--slate-900);
+  background: var(--slate-50);
+  font: 14px/1.5 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
 }
 
 main {
-  padding: 14px;
+  padding: 16px;
 }
 
 header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+  gap: 10px;
 }
 
-h1 {
-  margin: 0;
-  font-size: 16px;
-  font-weight: 650;
+.logo-icon {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  color: var(--teal-600);
 }
 
-button {
-  border: 1px solid #d0d7de;
-  border-radius: 6px;
-  background: #f6f8fa;
-  color: #1f2328;
-  font: inherit;
+.logo-text {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--teal-900);
+  letter-spacing: -0.01em;
+  flex: 1;
+}
+
+.header-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--slate-200);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--slate-500);
   cursor: pointer;
+  transition: all 160ms ease;
 }
 
-#refresh {
-  padding: 4px 8px;
-  font-size: 12px;
+.btn-icon svg {
+  width: 18px;
+  height: 18px;
 }
 
-#save-current {
-  width: 100%;
-  min-height: 38px;
-  margin-top: 12px;
-  font-weight: 650;
+.btn-icon:hover {
+  background: var(--teal-50);
+  border-color: var(--teal-200);
+  color: var(--teal-700);
+}
+
+.btn-icon:active {
+  background: var(--teal-100);
+  transform: scale(0.95);
+}
+
+.btn-icon:focus-visible {
+  outline: 2px solid var(--teal-500);
+  outline-offset: 2px;
+}
+
+.btn-icon:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.refresh-icon {
+  transition: transform 300ms ease;
+}
+
+.btn-icon:active .refresh-icon {
+  transform: rotate(180deg);
 }
 
 #status {
   min-height: 20px;
-  margin: 10px 0;
-  color: #57606a;
+  margin: 10px 0 8px;
+  padding: 5px 10px;
+  border-radius: 6px;
   font-size: 12px;
+  font-weight: 500;
+  color: var(--slate-500);
+  background: transparent;
+  transition: all 200ms ease;
+  display: none;
+}
+
+#status:not(:empty) {
+  display: block;
+}
+
+#save-current {
+  display: none;
 }
 
 #contexts {
   display: grid;
-  gap: 8px;
+  gap: 6px;
 }
 
 .context-row {
   width: 100%;
-  min-height: 54px;
-  padding: 8px;
+  padding: 10px 12px;
   text-align: left;
+  border: 1px solid var(--slate-200);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--slate-900);
+  font: inherit;
+  cursor: pointer;
+  transition: all 160ms ease;
+}
+
+.context-row:hover {
+  border-color: var(--teal-200);
+  background: var(--teal-50);
+  box-shadow: 0 2px 8px rgba(15, 118, 110, 0.08);
+}
+
+.context-row:active {
+  background: var(--teal-100);
+  transform: scale(0.99);
+}
+
+.context-row:focus-visible {
+  outline: 2px solid var(--teal-500);
+  outline-offset: 2px;
 }
 
 .context-title {
   display: block;
   overflow: hidden;
-  color: #1f2328;
   font-weight: 600;
+  font-size: 13px;
+  color: var(--slate-800);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .context-date {
   display: block;
-  margin-top: 2px;
-  color: #57606a;
+  margin-top: 3px;
+  font-size: 11px;
+  color: var(--slate-400);
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 32px 16px;
+  text-align: center;
+  color: var(--slate-400);
+}
+
+.empty-state svg {
+  width: 40px;
+  height: 40px;
+  color: var(--slate-300);
+  margin-bottom: 4px;
+}
+
+.empty-state p {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--slate-500);
+}
+
+.empty-state span {
   font-size: 12px;
+  line-height: 1.5;
+  max-width: 260px;
+  color: var(--slate-400);
+}
+
+.empty-state strong {
+  color: var(--teal-700);
+  font-weight: 600;
 }
