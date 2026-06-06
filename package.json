@@ -7,10 +7,12 @@
     "test": ".venv\\Scripts\\python.exe -m unittest discover -s tests",
     "backend": ".venv\\Scripts\\python.exe scripts\\run_backend.py",
     "check:python": ".venv\\Scripts\\python.exe -m py_compile api/core.py api/index.py",
+    "generate-icons": "node scripts/generate-icons.js",
     "check": "npm run build && npm test && npm run check:python"
   },
   "devDependencies": {
     "@types/chrome": "^0.0.287",
+    "sharp": "^0.34.5",
     "typescript": "^5.7.2"
   }
 }

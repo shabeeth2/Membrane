@@ -9,7 +9,7 @@ const distAssetsDir = path.join(distDir, "assets");
 
 fs.mkdirSync(distDir, { recursive: true });
 
-for (const name of ["manifest.json", "popup.html", "popup.css"]) {
+for (const name of ["manifest.json", "popup.html", "popup.css", "injected.css"]) {
   fs.copyFileSync(path.join(extensionDir, name), path.join(distDir, name));
 }
 

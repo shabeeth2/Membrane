@@ -17,9 +17,19 @@
     "https://chat.mistral.ai/*",
     "http://localhost:8000/*"
   ],
+  "icons": {
+    "16": "assets/icon-16.png",
+    "48": "assets/icon-48.png",
+    "128": "assets/icon-128.png"
+  },
   "action": {
     "default_popup": "popup.html",
-    "default_title": "Membrane"
+    "default_title": "Membrane",
+    "default_icon": {
+      "16": "assets/icon-16.png",
+      "48": "assets/icon-48.png",
+      "128": "assets/icon-128.png"
+    }
   },
   "background": {
     "service_worker": "background.js",
@@ -27,7 +37,7 @@
   },
   "web_accessible_resources": [
     {
-      "resources": ["assets/logo.png"],
+      "resources": ["assets/logo.png", "assets/icon-16.png", "assets/logo.svg", "injected.css"],
       "matches": [
         "https://chatgpt.com/*",
         "https://chat.openai.com/*",

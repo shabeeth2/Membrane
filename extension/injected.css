@@ -1,0 +1,146 @@
+/* ── Inline controls (placed near input) ── */
+
+.membrane-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.membrane-btn--icon {
+  z-index: 2147483647;
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 1px solid rgba(45, 212, 191, 0.25);
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 2px 12px rgba(15, 118, 110, 0.08);
+  cursor: pointer;
+  transition: all 160ms ease;
+  color: #0f766e;
+}
+
+.membrane-btn--icon:hover {
+  background: rgba(204, 251, 241, 0.85);
+  border-color: rgba(94, 234, 212, 0.5);
+  box-shadow: 0 4px 16px rgba(15, 118, 110, 0.12);
+}
+
+.membrane-btn--icon:active {
+  transform: scale(0.93);
+}
+
+.membrane-btn--icon:focus-visible {
+  outline: 2px solid #14b8a6;
+  outline-offset: 2px;
+}
+
+.membrane-btn--icon:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.membrane-btn--icon.is-loading {
+  opacity: 0.6;
+  cursor: wait;
+  animation: membrane-pulse 1.2s ease-in-out infinite;
+}
+
+.membrane-btn--icon svg {
+  width: 16px;
+  height: 16px;
+  display: block;
+  pointer-events: none;
+}
+
+.membrane-btn--icon img {
+  width: 16px;
+  height: 16px;
+  display: block;
+  pointer-events: none;
+}
+
+/* Toast notification */
+.membrane-toast {
+  position: fixed;
+  right: 18px;
+  bottom: 74px;
+  z-index: 2147483647;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font: 600 13px system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 8px 32px rgba(15, 118, 110, 0.14);
+  border: 1px solid rgba(45, 212, 191, 0.2);
+  color: #134e4a;
+  animation: membrane-toast-in 280ms ease-out, membrane-toast-out 300ms ease-in 2400ms forwards;
+  -webkit-font-smoothing: antialiased;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.membrane-toast::before {
+  content: "";
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  border-radius: 50%;
+}
+
+.membrane-toast[data-tone="success"] {
+  border-color: rgba(5, 150, 105, 0.25);
+  color: #065f46;
+}
+
+.membrane-toast[data-tone="success"]::before {
+  background: #059669;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3'%3E%3Cpath d='M5 13l4 4L19 7'/%3E%3C/svg%3E") center/10px no-repeat;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3'%3E%3Cpath d='M5 13l4 4L19 7'/%3E%3C/svg%3E") center/10px no-repeat;
+  background-color: #059669;
+}
+
+.membrane-toast[data-tone="error"] {
+  border-color: rgba(225, 29, 72, 0.2);
+  color: #9f1239;
+}
+
+.membrane-toast[data-tone="error"]::before {
+  border-radius: 50%;
+  background: #e11d48;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3'%3E%3Cpath d='M18 6L6 18M6 6l12 12'/%3E%3C/svg%3E") center/10px no-repeat;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3'%3E%3Cpath d='M18 6L6 18M6 6l12 12'/%3E%3C/svg%3E") center/10px no-repeat;
+  background-color: #e11d48;
+}
+
+.membrane-toast[data-tone="neutral"]::before {
+  background: #14b8a6;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpath d='M12 8v4M12 16h.01'/%3E%3C/svg%3E") center/10px no-repeat;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpath d='M12 8v4M12 16h.01'/%3E%3C/svg%3E") center/10px no-repeat;
+  background-color: #14b8a6;
+}
+
+@keyframes membrane-toast-in {
+  from { opacity: 0; transform: translateX(24px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes membrane-toast-out {
+  from { opacity: 1; transform: translateX(0); }
+  to { opacity: 0; transform: translateX(12px); }
+}
+
+@keyframes membrane-pulse {
+  0%, 100% { opacity: 0.7; }
+  50% { opacity: 0.5; }
+}

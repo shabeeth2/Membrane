@@ -1,10 +1,15 @@
 node_modules/
 .venv/
 .env
+.env.local
+.env.*.local
 __pycache__/
 *.pyc
 dist/
 uvicorn*.log
+*.log
 bg-test.txt
 *.crx
 *.pem
+.DS_Store
+Thumbs.db
