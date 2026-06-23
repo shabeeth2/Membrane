@@ -230,7 +230,7 @@ function createRelayControls(): HTMLDivElement {
   importBtn.className = "relay-btn--icon";
   importBtn.title = "Open Relay";
   importBtn.setAttribute("aria-label", "Open Relay");
-  importBtn.innerHTML = `<img src="${chrome.runtime.getURL("assets/icon-16.png")}" alt="" style="width:16px;height:16px;display:block;pointer-events:none">`;
+  importBtn.innerHTML = `<svg viewBox="0 0 24 24" width="16" height="16" fill="none"><rect x="4" y="4" width="3" height="16" rx="1.5" fill="currentColor"/><rect x="10.5" y="2" width="3" height="20" rx="1.5" fill="currentColor"/><rect x="17" y="7" width="3" height="10" rx="1.5" fill="currentColor"/><path d="M2 12h20" stroke="#00e680" stroke-width="2.5" stroke-linecap="round"/><path d="M17 8l5 4-5 4" stroke="#00e680" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
   importBtn.addEventListener("click", (e) => {
     e.preventDefault();
     e.stopPropagation();
