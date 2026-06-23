@@ -1,6 +1,6 @@
-# Membrane
+# Relay
 
-Membrane is a Chrome extension plus FastAPI backend for moving useful working context between AI chat tools.
+Relay is a Chrome extension plus FastAPI backend for moving useful working context between AI chat tools.
 
 It captures visible chat context from ChatGPT, Claude, or Perplexity, sends that raw chat to a local backend, cleans it through OpenRouter, stores the cleaned context in Supabase, then lets you inject saved context into another supported AI chat.
 
@@ -53,7 +53,7 @@ Build output goes to `dist/`. Chrome loads extension files from `dist/`, not `sr
 3. It also injects a small import button near chat composer.
 4. User clicks `Save Context`, or uses popup save button.
 5. Content script scrapes visible chat text.
-6. Background service worker sends raw chat to backend with `X-Membrane-Client-Id`.
+6. Background service worker sends raw chat to backend with `X-Relay-Client-Id`.
 7. Backend validates input and truncates very large chats.
 8. Backend asks OpenRouter to convert messy chat into clean reusable project context.
 9. Backend parses title/content, hashes content, dedupes by client id plus hash.
@@ -193,7 +193,7 @@ Result:
 2. Open `chrome://extensions`.
 3. Enable Developer mode.
 4. Click `Load unpacked`.
-5. Select `D:\projects\Membrane\dist`.
+5. Select `D:\projects\Relay\dist`.
 6. Copy generated extension ID.
 7. Put `chrome-extension://<id>` in `.env` as `ALLOWED_EXTENSION_ORIGINS`.
 8. Restart backend after changing `.env`.
@@ -249,7 +249,7 @@ export const API_BASE_URL = "http://localhost:8000";
 All context endpoints require:
 
 ```http
-X-Membrane-Client-Id: <client-id>
+X-Relay-Client-Id: <client-id>
 Content-Type: application/json
 ```
 
@@ -261,7 +261,7 @@ Example:
 
 ```json
 {
-  "name": "Membrane API",
+  "name": "Relay API",
   "status": "ok",
   "health": "/health"
 }
@@ -350,7 +350,7 @@ Implemented in `api/core.py`.
 
 Validation:
 
-- `X-Membrane-Client-Id` must be non-empty.
+- `X-Relay-Client-Id` must be non-empty.
 - `raw_chat` must be non-empty after trim.
 
 Truncation:
@@ -359,7 +359,7 @@ Truncation:
 - If raw chat is over limit:
   - keep first `10_000` chars
   - keep last `50_000` chars
-  - insert Membrane truncation note between head and tail
+  - insert Relay truncation note between head and tail
   - return `truncated: true`
 
 Cleanup prompt asks model to return exactly:
@@ -410,9 +410,9 @@ Dedupe:
 
 `src/client.ts`:
 
-- stores client id in `chrome.storage.local` under `membrane_client_id`
+- stores client id in `chrome.storage.local` under `relay_client_id`
 - creates random 16-byte hex client id when none exists
-- adds `X-Membrane-Client-Id` to every backend request
+- adds `X-Relay-Client-Id` to every backend request
 - throws backend `detail` message on non-2xx responses
 
 ### Content Script
@@ -458,7 +458,7 @@ Backend CORS:
 - allows origins from `.env` `ALLOWED_EXTENSION_ORIGINS`
 - allows localhost/127.0.0.1 via regex
 - allows methods `GET`, `POST`, `OPTIONS`
-- allows headers `Content-Type`, `X-Membrane-Client-Id`
+- allows headers `Content-Type`, `X-Relay-Client-Id`
 
 ## Tests
 
@@ -521,7 +521,7 @@ Change `src/config.ts` before using a deployed backend.
 4. Open supported chat site.
 5. Click `Save Context`.
 6. Open another supported chat site.
-7. Click Membrane popup or import button.
+7. Click Relay popup or import button.
 8. Select saved context to inject.
 
 ## Troubleshooting
@@ -564,7 +564,7 @@ Change `src/config.ts` before using a deployed backend.
 - Do not commit `.env`.
 - Contexts are scoped by generated client id, not user auth.
 - Client id lives in Chrome local extension storage.
-- Current backend trusts `X-Membrane-Client-Id`; this is adequate for local MVP, not strong auth.
+- Current backend trusts `X-Relay-Client-Id`; this is adequate for local MVP, not strong auth.
 
 ## Limitations
 
