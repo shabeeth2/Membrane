@@ -3,7 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Relay — Move context between AI chats seamlessly</title>
+    <title>Relay — Move context between AI chats</title>
+    <meta name="description" content="Capture chat context from one AI tool, clean it up, and inject it into another. Never lose your working thread.">
+    <meta property="og:title" content="Relay — Move context between AI chats">
+    <meta property="og:description" content="Capture chat context from one AI tool, clean it up, and inject it into another.">
+    <meta property="og:type" content="website">
+    <link rel="icon" type="image/svg+xml" href="assets/relay-logo.svg">
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Font Inter & JetBrains Mono -->
@@ -82,22 +87,19 @@
     <nav class="fixed top-0 left-0 right-0 z-50 transition-all duration-300 border-b border-transparent py-4 px-6 md:px-12" id="main-nav">
         <div class="max-w-7xl mx-auto flex items-center justify-between">
             <div class="flex items-center gap-3">
-                <div class="w-8 h-8 rounded-lg bg-brand flex items-center justify-center font-bold text-black text-xl shadow-[0_0_20px_rgba(0,230,128,0.5)]">
-                    R
-                </div>
+                <img src="assets/relay-logo.svg" alt="Relay" class="w-8 h-8">
                 <span class="text-xl font-bold tracking-tight text-white">Relay</span>
             </div>
             
             <div class="hidden md:flex items-center gap-8 text-sm font-medium text-neutral-400">
                 <a href="#features" class="hover:text-brand transition-colors">Features</a>
-                <a href="#simulator" class="hover:text-brand transition-colors">Simulator</a>
-                <a href="#compatibility" class="hover:text-brand transition-colors">Compatibility</a>
+                <a href="#compatibility" class="hover:text-brand transition-colors">Supported Sites</a>
                 <a href="#how-it-works" class="hover:text-brand transition-colors">How it works</a>
             </div>
 
             <div class="flex items-center gap-4">
-                <a href="#simulator" class="hidden sm:inline-block text-sm text-neutral-400 hover:text-white transition-colors">Try Demo</a>
-                <button class="bg-brand hover:bg-brand/90 text-black font-semibold text-xs px-4 py-2.5 rounded-full transition-all hover:scale-105 duration-200 shadow-[0_0_15px_rgba(0,230,128,0.3)]">
+                <a href="#how-it-works" class="hidden sm:inline-block text-sm text-neutral-400 hover:text-white transition-colors">How it works</a>
+                <button onclick="window.open('#chrome-web-store', '_blank')" class="bg-brand hover:bg-brand/90 text-black font-semibold text-xs px-4 py-2.5 rounded-full transition-all hover:scale-105 duration-200 shadow-[0_0_15px_rgba(0,230,128,0.3)]">
                     Install Relay
                 </button>
             </div>
@@ -114,10 +116,10 @@
         <div class="absolute inset-y-0 left-0 w-1/4 bg-gradient-to-r from-[#030303] to-transparent pointer-events-none z-10"></div>
 
         <div class="relative z-20 max-w-5xl mx-auto px-6 text-center mt-8">
-            <!-- Active Status Indicator -->
-            <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-mono mb-8 animate-pulse">
+            <!-- Status Indicator -->
+            <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-mono mb-8">
                 <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
-                ACTIVE VERSION 1.2 LIVE
+                OPEN SOURCE — FREE TO USE
             </div>
 
             <!-- Main Heading -->
@@ -127,22 +129,22 @@
             </h1>
 
             <p class="text-neutral-400 text-base md:text-lg max-w-2xl mx-auto mb-10 leading-relaxed">
-                Capture entire conversations, clean up repetitive UI filler, and inject instantly into another LLM window. Never lose your working thread again.
+                Capture entire conversations, clean up the noise, and inject instantly into another AI chat. Never lose your working thread again.
             </p>
 
             <!-- CTA Actions -->
             <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
-                <button onclick="document.getElementById('simulator').scrollIntoView({behavior: 'smooth'})" class="w-full sm:w-auto bg-brand hover:bg-brand/90 text-black font-semibold px-8 py-4 rounded-xl transition-all duration-200 transform hover:-translate-y-1 shadow-[0_0_30px_rgba(0,230,128,0.2)]">
+                <button onclick="window.open('#chrome-web-store', '_blank')" class="w-full sm:w-auto bg-brand hover:bg-brand/90 text-black font-semibold px-8 py-4 rounded-xl transition-all duration-200 transform hover:-translate-y-1 shadow-[0_0_30px_rgba(0,230,128,0.2)]">
                     <i class="fa-brands fa-chrome mr-2"></i> Install Chrome Extension
                 </button>
-                <button onclick="document.getElementById('simulator').scrollIntoView({behavior: 'smooth'})" class="w-full sm:w-auto bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-white font-semibold px-8 py-4 rounded-xl transition-all duration-200">
-                    See interactive demo
+                <button onclick="document.getElementById('how-it-works').scrollIntoView({behavior: 'smooth'})" class="w-full sm:w-auto bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-white font-semibold px-8 py-4 rounded-xl transition-all duration-200">
+                    See how it works
                 </button>
             </div>
 
             <!-- Scroll Indicator -->
             <div class="animate-bounce text-neutral-500 text-xs font-mono">
-                <p class="mb-2">DRAG TO ROTATE 3D SYSTEM</p>
+                <p class="mb-2">SCROLL TO EXPLORE</p>
                 <i class="fa-solid fa-chevron-down text-brand"></i>
             </div>
         </div>
@@ -254,11 +256,11 @@
         <div class="max-w-7xl mx-auto px-6">
             <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-16 gap-4">
                 <div>
-                    <span class="text-brand font-mono text-xs tracking-widest uppercase">High Performance Pipeline</span>
-                    <h2 class="text-3xl md:text-5xl font-bold tracking-tight text-white mt-2">Seamless Context Transfer</h2>
+                    <span class="text-brand font-mono text-xs tracking-widest uppercase">HOW IT WORKS</span>
+                    <h2 class="text-3xl md:text-5xl font-bold tracking-tight text-white mt-2">Three steps to transfer context</h2>
                 </div>
                 <p class="text-neutral-400 max-w-md">
-                    Powered by local LLM sanitization and deep browser DOM bindings, context delivery takes less than 200ms.
+                    No copy-paste chains. No re-explaining. Relay captures, cleans, and injects your context automatically.
                 </p>
             </div>
 
@@ -268,9 +270,9 @@
                 <div class="glass-card rounded-2xl p-8 flex flex-col justify-between transition-all duration-300 hover:-translate-y-2 group">
                     <div>
                         <div class="text-brand font-mono text-4xl font-extrabold mb-6 opacity-40 group-hover:opacity-100 transition-opacity">01</div>
-                        <h3 class="text-xl font-bold text-white mb-3">Instant Capture</h3>
+                        <h3 class="text-xl font-bold text-white mb-3">Capture</h3>
                         <p class="text-neutral-400 text-sm leading-relaxed mb-6">
-                            Press Relay on your sidebar. We parse and capture your active browser thread dynamically, preserving deep prompt chains.
+                            Open any supported AI chat and click the Relay button. Your conversation is scraped and saved automatically.
                         </p>
                     </div>
                     <div class="h-1 bg-gradient-to-r from-transparent via-neutral-800 to-transparent group-hover:via-brand transition-all duration-300 rounded"></div>
@@ -280,9 +282,9 @@
                 <div class="glass-card rounded-2xl p-8 flex flex-col justify-between transition-all duration-300 hover:-translate-y-2 group">
                     <div>
                         <div class="text-cyan-400 font-mono text-4xl font-extrabold mb-6 opacity-40 group-hover:opacity-100 transition-opacity">02</div>
-                        <h3 class="text-xl font-bold text-white mb-3">Smart Compaction</h3>
+                        <h3 class="text-xl font-bold text-white mb-3">Clean Up</h3>
                         <p class="text-neutral-400 text-sm leading-relaxed mb-6">
-                            Removes empty prompts, UI boilerplate elements, system padding, and raw conversational greetings to save system token limits.
+                            AI-powered cleanup removes noise, structures your context into goals, constraints, and decisions — ready for the next chat.
                         </p>
                     </div>
                     <div class="h-1 bg-gradient-to-r from-transparent via-neutral-800 to-transparent group-hover:via-cyan-400 transition-all duration-300 rounded"></div>
@@ -292,9 +294,9 @@
                 <div class="glass-card rounded-2xl p-8 flex flex-col justify-between transition-all duration-300 hover:-translate-y-2 group">
                     <div>
                         <div class="text-purple-400 font-mono text-4xl font-extrabold mb-6 opacity-40 group-hover:opacity-100 transition-opacity">03</div>
-                        <h3 class="text-xl font-bold text-white mb-3">Hot Injection</h3>
+                        <h3 class="text-xl font-bold text-white mb-3">Inject</h3>
                         <p class="text-neutral-400 text-sm leading-relaxed mb-6">
-                            Switch tabs to your target model window and press Paste. Relay reconstructs your context as a coherent multi-turn stack.
+                            Switch to another AI chat, click Import, and your saved context appears in the input — ready to continue where you left off.
                         </p>
                     </div>
                     <div class="h-1 bg-gradient-to-r from-transparent via-neutral-800 to-transparent group-hover:via-purple-400 transition-all duration-300 rounded"></div>
@@ -306,9 +308,9 @@
     <section id="compatibility" class="py-24 border-t border-white/5 relative">
         <div class="max-w-7xl mx-auto px-6">
             <div class="text-center mb-16">
-                <span class="text-brand font-mono text-xs tracking-widest uppercase">UNIVERSAL COMPATIBILITY</span>
-                <h2 class="text-3xl md:text-5xl font-bold tracking-tight text-white mt-2">Compatible with your ecosystem</h2>
-                <p class="text-neutral-400 max-w-lg mx-auto mt-3">Avoid breaking your context stream. Relay has hardware-level integration with leading AI providers.</p>
+                <span class="text-brand font-mono text-xs tracking-widest uppercase">SUPPORTED PLATFORMS</span>
+                <h2 class="text-3xl md:text-5xl font-bold tracking-tight text-white mt-2">Works across 10 AI tools</h2>
+                <p class="text-neutral-400 max-w-lg mx-auto mt-3">Capture from one, inject into another. Relay works with the AI tools you already use.</p>
             </div>
 
             <!-- Bento Grid Layout -->
@@ -318,14 +320,12 @@
                 <div class="col-span-1 md:col-span-2 row-span-2 glass-card rounded-2xl p-6 md:p-8 flex flex-col justify-between group overflow-hidden relative border border-white/10 hover:border-emerald-500/50 transition-all duration-500 hover:shadow-[0_0_50px_rgba(16,163,127,0.15)]">
                     <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-emerald-500/10 rounded-full blur-3xl group-hover:bg-emerald-500/20 transition-all duration-500"></div>
                     <div class="flex justify-between items-start z-10">
-                        <div class="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 text-xl group-hover:scale-110 transition-transform">
-                            <i class="fa-solid fa-bolt"></i>
-                        </div>
+                        <img src="assets/chatgpt.png" alt="ChatGPT" class="w-12 h-12 rounded-xl object-contain group-hover:scale-110 transition-transform">
                         <span class="text-xs font-mono text-neutral-500">01 / OPENAI</span>
                     </div>
                     <div class="z-10">
-                        <h3 class="text-2xl font-bold text-white mb-2">ChatGPT Integration</h3>
-                        <p class="text-sm text-neutral-400 leading-relaxed">Direct dynamic DOM scraping hooks with instant token extraction across GPT-4o, o1, and all custom GPT environments.</p>
+                        <h3 class="text-2xl font-bold text-white mb-2">ChatGPT</h3>
+                        <p class="text-sm text-neutral-400 leading-relaxed">Capture conversations from ChatGPT including GPT-4o, o1, and custom GPTs.</p>
                     </div>
                 </div>
 
@@ -333,84 +333,72 @@
                 <div class="col-span-1 md:col-span-1 row-span-2 glass-card rounded-2xl p-6 md:p-8 flex flex-col justify-between group overflow-hidden relative border border-white/10 hover:border-amber-500/50 transition-all duration-500 hover:shadow-[0_0_50px_rgba(217,119,6,0.15)]">
                     <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-amber-500/10 rounded-full blur-3xl group-hover:bg-amber-500/20 transition-all duration-500"></div>
                     <div class="flex justify-between items-start z-10">
-                        <div class="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-xl group-hover:scale-110 transition-transform">
-                            <i class="fa-solid fa-fire-flame-curved"></i>
-                        </div>
+                        <img src="assets/claude.png" alt="Claude" class="w-12 h-12 rounded-xl object-contain group-hover:scale-110 transition-transform">
                         <span class="text-xs font-mono text-neutral-500">02 / ANTHROPIC</span>
                     </div>
                     <div class="z-10">
                         <h3 class="text-xl font-bold text-white mb-2">Claude</h3>
-                        <p class="text-xs text-neutral-400 leading-relaxed">Optimized to read Artifact logs, internal reasoning blocks, and structured code assets dynamically.</p>
+                        <p class="text-xs text-neutral-400 leading-relaxed">Capture from Claude including artifact logs and code discussions.</p>
                     </div>
                 </div>
 
                 <!-- Gemini (Small card) -->
                 <div class="col-span-1 md:col-span-1 row-span-1 glass-card rounded-2xl p-6 flex flex-col justify-between group overflow-hidden relative border border-white/10 hover:border-blue-500/50 transition-all duration-500 hover:shadow-[0_0_40px_rgba(59,130,246,0.15)]">
                     <div class="flex justify-between items-center z-10">
-                        <div class="w-10 h-10 rounded-lg bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-blue-400 group-hover:scale-110 transition-transform">
-                            <i class="fa-solid fa-wand-magic-sparkles"></i>
-                        </div>
+                        <img src="assets/gemini.png" alt="Gemini" class="w-10 h-10 rounded-lg object-contain group-hover:scale-110 transition-transform">
                         <span class="text-xs font-mono text-neutral-500">03 / GOOGLE</span>
                     </div>
                     <div class="z-10">
                         <h3 class="text-lg font-bold text-white">Gemini</h3>
-                        <p class="text-xs text-neutral-400">Maintains deep token state integrity over multi-million-turn dialog chains.</p>
+                        <p class="text-xs text-neutral-400">Works with Google Gemini conversations.</p>
                     </div>
                 </div>
 
                 <!-- Perplexity (Small card) -->
                 <div class="col-span-1 md:col-span-1 row-span-1 glass-card rounded-2xl p-6 flex flex-col justify-between group overflow-hidden relative border border-white/10 hover:border-cyan-500/50 transition-all duration-500 hover:shadow-[0_0_40px_rgba(6,182,212,0.15)]">
                     <div class="flex justify-between items-center z-10">
-                        <div class="w-10 h-10 rounded-lg bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 group-hover:scale-110 transition-transform">
-                            <i class="fa-solid fa-magnifying-glass"></i>
-                        </div>
+                        <img src="assets/perplexity.png" alt="Perplexity" class="w-10 h-10 rounded-lg object-contain group-hover:scale-110 transition-transform">
                         <span class="text-xs font-mono text-neutral-500">04 / SEARCH</span>
                     </div>
                     <div class="z-10">
                         <h3 class="text-lg font-bold text-white">Perplexity</h3>
-                        <p class="text-xs text-neutral-400">Routes verified web search context sources cleanly into code workspace targets.</p>
+                        <p class="text-xs text-neutral-400">Capture research threads with sources.</p>
                     </div>
                 </div>
 
                 <!-- Copilot (Small card) -->
                 <div class="col-span-1 md:col-span-1 row-span-1 glass-card rounded-2xl p-6 flex flex-col justify-between group overflow-hidden relative border border-white/10 hover:border-violet-500/50 transition-all duration-500 hover:shadow-[0_0_40px_rgba(139,92,246,0.15)]">
                     <div class="flex justify-between items-center z-10">
-                        <div class="w-10 h-10 rounded-lg bg-violet-500/10 border border-violet-500/30 flex items-center justify-center text-violet-400 group-hover:scale-110 transition-transform">
-                            <i class="fa-solid fa-code"></i>
-                        </div>
+                        <img src="assets/copilot.png" alt="Copilot" class="w-10 h-10 rounded-lg object-contain group-hover:scale-110 transition-transform">
                         <span class="text-xs font-mono text-neutral-500">05 / MS COPILOT</span>
                     </div>
                     <div class="z-10">
                         <h3 class="text-lg font-bold text-white">Copilot</h3>
-                        <p class="text-xs text-neutral-400">Routes complex development issues into local code instances.</p>
+                        <p class="text-xs text-neutral-400">Capture from Microsoft Copilot.</p>
                     </div>
                 </div>
 
                 <!-- Grok (Small card) -->
                 <div class="col-span-1 md:col-span-1 row-span-1 glass-card rounded-2xl p-6 flex flex-col justify-between group overflow-hidden relative border border-white/10 hover:border-neutral-200/50 transition-all duration-500 hover:shadow-[0_0_40px_rgba(255,255,255,0.08)]">
                     <div class="flex justify-between items-center z-10">
-                        <div class="w-10 h-10 rounded-lg bg-neutral-100/10 border border-neutral-100/30 flex items-center justify-center text-neutral-100 group-hover:scale-110 transition-transform">
-                            <i class="fa-solid fa-xmark"></i>
-                        </div>
+                        <img src="assets/grok.png" alt="Grok" class="w-10 h-10 rounded-lg object-contain group-hover:scale-110 transition-transform">
                         <span class="text-xs font-mono text-neutral-500">06 / X.AI</span>
                     </div>
                     <div class="z-10">
                         <h3 class="text-lg font-bold text-white">Grok</h3>
-                        <p class="text-xs text-neutral-400">Transfers continuous raw X-stream datasets directly into your prompt buffer.</p>
+                        <p class="text-xs text-neutral-400">Capture conversations from Grok.</p>
                     </div>
                 </div>
 
                 <!-- Mistral (Small card) -->
                 <div class="col-span-1 md:col-span-1 row-span-1 glass-card rounded-2xl p-6 flex flex-col justify-between group overflow-hidden relative border border-white/10 hover:border-orange-500/50 transition-all duration-500 hover:shadow-[0_0_40px_rgba(249,115,22,0.15)]">
                     <div class="flex justify-between items-center z-10">
-                        <div class="w-10 h-10 rounded-lg bg-orange-500/10 border border-orange-500/30 flex items-center justify-center text-orange-400 group-hover:scale-110 transition-transform">
-                            <i class="fa-solid fa-cubes"></i>
-                        </div>
+                        <img src="assets/mistral.png" alt="Mistral" class="w-10 h-10 rounded-lg object-contain group-hover:scale-110 transition-transform">
                         <span class="text-xs font-mono text-neutral-500">07 / MISTRAL</span>
                     </div>
                     <div class="z-10">
                         <h3 class="text-lg font-bold text-white">Mistral</h3>
-                        <p class="text-xs text-neutral-400">Syncs developer instances with decentralized open-weight models.</p>
+                        <p class="text-xs text-neutral-400">Capture from Mistral AI chat.</p>
                     </div>
                 </div>
 
@@ -438,10 +426,10 @@
                 
                 <!-- Left Details -->
                 <div>
-                    <span class="text-brand font-mono text-xs tracking-widest uppercase">RECONSTRUCTED UI BLUEPRINT</span>
-                    <h2 class="text-3xl md:text-5xl font-bold tracking-tight text-white mt-2 mb-6">Designed with Architectural Intent</h2>
+                    <span class="text-brand font-mono text-xs tracking-widest uppercase">KEY FEATURES</span>
+                    <h2 class="text-3xl md:text-5xl font-bold tracking-tight text-white mt-2 mb-6">Built for real workflows</h2>
                     <p class="text-neutral-400 leading-relaxed mb-6">
-                        In reference to our design architecture represented in the blueprint of <span class="text-white font-mono text-xs px-1.5 py-0.5 rounded bg-neutral-900 border border-white/10">image_36a3fb.png</span>, we have optimized the transition pipeline from flat tables into fully hardware-accelerated nodes.
+                        Relay handles the heavy lifting so you can focus on your work. Capture once, inject anywhere — no manual copy-paste chains.
                     </p>
                     
                     <div class="space-y-4">
@@ -450,8 +438,8 @@
                                 <i class="fa-solid fa-magnifying-glass-chart"></i>
                             </div>
                             <div>
-                                <h4 class="text-white font-semibold">One-Click Capturing</h4>
-                                <p class="text-sm text-neutral-400">Scrapes modern chat interfaces using state-aware virtual DOM tree selectors.</p>
+                                <h4 class="text-white font-semibold">One-Click Capture</h4>
+                                <p class="text-sm text-neutral-400">Scrapes chat content from supported AI tools with a single click.</p>
                             </div>
                         </div>
 
@@ -460,8 +448,8 @@
                                 <i class="fa-solid fa-filter"></i>
                             </div>
                             <div>
-                                <h4 class="text-white font-semibold">Advanced AI Cleanup Filter</h4>
-                                <p class="text-sm text-neutral-400">Identifies and eliminates redundant agent replies, conversational fluff, and system boilerplate.</p>
+                                <h4 class="text-white font-semibold">AI-Powered Cleanup</h4>
+                                <p class="text-sm text-neutral-400">Transforms messy chats into structured context — goals, constraints, decisions.</p>
                             </div>
                         </div>
 
@@ -470,14 +458,14 @@
                                 <i class="fa-solid fa-server"></i>
                             </div>
                             <div>
-                                <h4 class="text-white font-semibold">Local MCP Integration</h4>
-                                <p class="text-sm text-neutral-400">Supports direct synchronization with local Model Context Protocol dev environments.</p>
+                                <h4 class="text-white font-semibold">MCP Integration</h4>
+                                <p class="text-sm text-neutral-400">Connect Relay to any MCP-compatible AI client for programmatic access.</p>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Right Visual: Interactive UI Mockup Blueprint -->
+                <!-- Right Visual: Flow Diagram -->
                 <div class="glass-card rounded-2xl border border-white/5 p-6 relative group overflow-hidden">
                     <div class="absolute inset-0 bg-gradient-to-br from-brand/5 to-transparent pointer-events-none"></div>
                     <div class="flex items-center justify-between border-b border-white/5 pb-4 mb-6">
@@ -486,17 +474,17 @@
                             <span class="w-3 h-3 rounded-full bg-yellow-500/80"></span>
                             <span class="w-3 h-3 rounded-full bg-green-500/80"></span>
                         </div>
-                        <span class="text-xs font-mono text-neutral-500">relay_blueprint.sys</span>
+                        <span class="text-xs font-mono text-neutral-500">relay_context_flow</span>
                     </div>
 
-                    <!-- Flow Diagram Recreated beautifully -->
+                    <!-- Flow Diagram -->
                     <div class="space-y-4">
                         <div class="flex items-center justify-between bg-neutral-900/40 p-4 rounded-xl border border-white/5 relative">
                             <div class="flex items-center gap-3">
                                 <i class="fa-solid fa-bolt text-emerald-400"></i>
-                                <span class="font-mono text-sm text-white">Source Context Stack</span>
+                                <span class="font-mono text-sm text-white">Source Chat Context</span>
                             </div>
-                            <span class="text-xs font-mono text-emerald-400">Captured (1.4K Tokens)</span>
+                            <span class="text-xs font-mono text-emerald-400">Captured</span>
                         </div>
 
                         <div class="flex justify-center my-2">
@@ -506,8 +494,8 @@
                         <div class="bg-neutral-950 p-4 rounded-xl border border-dashed border-neutral-800 text-center relative">
                             <div class="absolute inset-0 bg-brand/5 rounded-xl animate-pulse"></div>
                             <i class="fa-solid fa-wand-magic-sparkles text-brand text-lg mb-2"></i>
-                            <div class="text-sm font-mono text-white">Relay Synthesizer Engine</div>
-                            <div class="text-xs text-neutral-500 mt-1">Strip filler, deduplicate code templates, apply context weight.</div>
+                            <div class="text-sm font-mono text-white">Relay Cleanup Engine</div>
+                            <div class="text-xs text-neutral-500 mt-1">Remove noise, structure context, deduplicate.</div>
                         </div>
 
                         <div class="flex justify-center my-2">
@@ -517,9 +505,9 @@
                         <div class="flex items-center justify-between bg-neutral-900/40 p-4 rounded-xl border border-white/5">
                             <div class="flex items-center gap-3">
                                 <i class="fa-solid fa-arrows-to-dot text-purple-400"></i>
-                                <span class="font-mono text-sm text-white">Target LLM Injection</span>
+                                <span class="font-mono text-sm text-white">Target Chat Injection</span>
                             </div>
-                            <span class="text-xs font-mono text-purple-400">Deploy (400 Tokens)</span>
+                            <span class="text-xs font-mono text-purple-400">Ready</span>
                         </div>
                     </div>
                 </div>
@@ -555,11 +543,11 @@
             </div>
 
             <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
-                <button class="w-full sm:w-auto bg-brand hover:bg-brand/90 text-black font-semibold px-8 py-4 rounded-xl transition-all duration-200 shadow-[0_0_30px_rgba(0,230,128,0.3)]">
+                <button onclick="window.open('#chrome-web-store', '_blank')" class="w-full sm:w-auto bg-brand hover:bg-brand/90 text-black font-semibold px-8 py-4 rounded-xl transition-all duration-200 shadow-[0_0_30px_rgba(0,230,128,0.3)]">
                     Install Relay from Chrome Store
                 </button>
-                <a href="#simulator" class="w-full sm:w-auto bg-neutral-900 hover:bg-neutral-800 text-white font-semibold px-8 py-4 rounded-xl border border-white/5 hover:border-white/10 transition-colors">
-                    View setup guide
+                <a href="https://github.com/shabeeth2/Membrane" target="_blank" class="w-full sm:w-auto bg-neutral-900 hover:bg-neutral-800 text-white font-semibold px-8 py-4 rounded-xl border border-white/5 hover:border-white/10 transition-colors">
+                    View on GitHub
                 </a>
             </div>
         </div>
@@ -568,19 +556,18 @@
     <footer class="py-12 border-t border-white/5 bg-[#030303] text-neutral-500 text-sm relative">
         <div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-6">
             <div class="flex items-center gap-3">
-                <div class="w-6 h-6 rounded bg-brand flex items-center justify-center text-black font-bold text-sm">R</div>
+                <img src="assets/relay-logo.svg" alt="Relay" class="w-6 h-6">
                 <span class="text-white font-bold">Relay</span>
             </div>
 
             <div class="text-center md:text-left text-xs text-neutral-600">
-                &copy; 2026 Relay. Built with OpenRouter. Inspired by design concepts from <span class="font-mono text-neutral-400">image_36a3fb.png</span>.
+                &copy; 2026 Relay. Built with OpenRouter + Supabase.
             </div>
 
             <div class="flex items-center gap-6 text-xs">
-                <a href="#" class="hover:text-white transition-colors">Legal</a>
+                <a href="#" class="hover:text-white transition-alls">Legal</a>
                 <a href="#" class="hover:text-white transition-colors">Privacy</a>
-                <a href="#" class="hover:text-white transition-colors">Twitter</a>
-                <a href="https://github.com" target="_blank" class="hover:text-white transition-colors">GitHub</a>
+                <a href="https://github.com/shabeeth2/Membrane" target="_blank" class="hover:text-white transition-colors">GitHub</a>
             </div>
         </div>
     </footer>
