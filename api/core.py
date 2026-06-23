@@ -31,7 +31,7 @@ def truncate_raw_chat(raw_chat: str) -> tuple[str, bool]:
     tail = raw_chat[-RAW_CHAT_TAIL:].lstrip()
     retained = (
         f"{head}\n\n"
-        "[Membrane note: middle of this chat was omitted because the raw input "
+        "[Relay note: middle of this chat was omitted because the raw input "
         "exceeded the MVP capture limit. Preserve important context from the "
         "beginning and end.]\n\n"
         f"{tail}"

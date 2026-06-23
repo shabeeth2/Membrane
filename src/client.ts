@@ -1,7 +1,7 @@
 import { API_BASE_URL } from "./config.js";
 import type { CaptureResult, ContextDetail, ContextSummary } from "./types.js";
 
-const CLIENT_ID_KEY = "membrane_client_id";
+const CLIENT_ID_KEY = "relay_client_id";
 
 function randomId(): string {
   const bytes = new Uint8Array(16);
@@ -24,7 +24,7 @@ export async function getClientId(): Promise<string> {
 async function apiFetch<T>(path: string, init: RequestInit = {}): Promise<T> {
   const clientId = await getClientId();
   const headers = new Headers(init.headers);
-  headers.set("X-Membrane-Client-Id", clientId);
+  headers.set("X-Relay-Client-Id", clientId);
   headers.set("Content-Type", "application/json");
 
   const response = await fetch(`${API_BASE_URL}${path}`, { ...init, headers });

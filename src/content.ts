@@ -1,8 +1,8 @@
 import { SUPPORTED_HOSTS } from "./config.js";
 import type { RuntimeRequest, RuntimeResponse } from "./types.js";
 
-const MEMBRANE_CONTROLS_ID = "membrane-controls";
-const IMPORT_BUTTON_ID = "membrane-import-context";
+const RELAY_CONTROLS_ID = "relay-controls";
+const IMPORT_BUTTON_ID = "relay-import-context";
 const MIN_CAPTURE_CHARS = 100;
 
 function isSupportedHost(host = window.location.hostname): boolean {
@@ -21,7 +21,7 @@ function currentSite(host = window.location.hostname): "chatgpt" | "claude" | "p
 }
 
 function loadStyles(): void {
-  const id = "membrane-styles";
+  const id = "relay-styles";
   if (document.getElementById(id)) return;
   const link = document.createElement("link");
   link.id = id;
@@ -31,11 +31,11 @@ function loadStyles(): void {
 }
 
 function toast(message: string, tone: "neutral" | "success" | "error" = "neutral"): void {
-  const existing = document.getElementById("membrane-toast");
+  const existing = document.getElementById("relay-toast");
   existing?.remove();
   const el = document.createElement("div");
-  el.id = "membrane-toast";
-  el.className = "membrane-toast";
+  el.id = "relay-toast";
+  el.className = "relay-toast";
   el.dataset.tone = tone;
   el.textContent = message;
   Object.assign(el.style, {
@@ -132,8 +132,8 @@ function evaluateXPath(path: string): HTMLElement | null {
   return visibleElement(result.singleNodeValue as Element | null);
 }
 
-function containsMembraneControls(element: HTMLElement): boolean {
-  return Boolean(element.querySelector(`#${MEMBRANE_CONTROLS_ID}`));
+function containsRelayControls(element: HTMLElement): boolean {
+  return Boolean(element.querySelector(`#${RELAY_CONTROLS_ID}`));
 }
 
 function resetImportButtonPlacement(element: HTMLElement): void {
@@ -143,7 +143,7 @@ function resetImportButtonPlacement(element: HTMLElement): void {
 function attachInFlow(container: HTMLElement, target: HTMLElement, before: Element | null = null): boolean {
   if (target === container) return false;
   if (target.contains(container)) { resetImportButtonPlacement(container); return true; }
-  if (containsMembraneControls(target)) return false;
+  if (containsRelayControls(target)) return false;
   resetImportButtonPlacement(container);
   if (before && before.parentElement === target) target.insertBefore(container, before);
   else if (!target.contains(container)) target.appendChild(container);
@@ -153,10 +153,11 @@ function attachInFlow(container: HTMLElement, target: HTMLElement, before: Eleme
 function attachFixed(element: HTMLElement, input?: HTMLElement): void {
   if (!document.body.contains(element)) document.body.appendChild(element);
   const inputRect = input?.getBoundingClientRect();
+  const hasRect = inputRect && inputRect.width > 0 && inputRect.height > 0;
   Object.assign(element.style, {
     position: "fixed",
-    right: inputRect ? Math.max(18, Math.round(window.innerWidth - inputRect.right + 44)) + "px" : "18px",
-    bottom: inputRect ? Math.max(18, Math.round(window.innerHeight - inputRect.bottom + 8)) + "px" : "18px",
+    right: hasRect ? Math.max(18, Math.round(window.innerWidth - inputRect!.right + 44)) + "px" : "18px",
+    bottom: hasRect ? Math.max(18, Math.round(window.innerHeight - inputRect!.bottom + 8)) + "px" : "80px",
     margin: "0",
     transform: "",
   });
@@ -196,20 +197,24 @@ function placeByNativeControls(container: HTMLElement, input: HTMLElement): bool
   return false;
 }
 
-function placeMembraneControls(container: HTMLElement, input: HTMLElement): void {
-  if (placeByNativeControls(container, input)) return;
+function placeRelayControls(container: HTMLElement, input: HTMLElement): void {
+  if (placeByNativeControls(container, input)) {
+    // Verify the placed container is actually visible; if clipped, fall back to fixed
+    if (!visibleElement(container)) attachFixed(container, input);
+    return;
+  }
   attachFixed(container, input);
 }
 
-function createMembraneControls(): HTMLDivElement {
+function createRelayControls(): HTMLDivElement {
   const container = document.createElement("div");
-  container.id = MEMBRANE_CONTROLS_ID;
-  container.className = "membrane-controls";
+  container.id = RELAY_CONTROLS_ID;
+  container.className = "relay-controls";
 
   const saveBtn = document.createElement("button");
-  saveBtn.id = "membrane-save-inline";
+  saveBtn.id = "relay-save-inline";
   saveBtn.type = "button";
-  saveBtn.className = "membrane-btn--icon";
+  saveBtn.className = "relay-btn--icon";
   saveBtn.title = "Save chat context";
   saveBtn.setAttribute("aria-label", "Save chat context");
   saveBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>`;
@@ -222,9 +227,9 @@ function createMembraneControls(): HTMLDivElement {
   const importBtn = document.createElement("button");
   importBtn.id = IMPORT_BUTTON_ID;
   importBtn.type = "button";
-  importBtn.className = "membrane-btn--icon";
-  importBtn.title = "Open Membrane";
-  importBtn.setAttribute("aria-label", "Open Membrane");
+  importBtn.className = "relay-btn--icon";
+  importBtn.title = "Open Relay";
+  importBtn.setAttribute("aria-label", "Open Relay");
   importBtn.innerHTML = `<img src="${chrome.runtime.getURL("assets/icon-16.png")}" alt="" style="width:16px;height:16px;display:block;pointer-events:none">`;
   importBtn.addEventListener("click", (e) => {
     e.preventDefault();
@@ -238,15 +243,15 @@ function createMembraneControls(): HTMLDivElement {
 
 async function openPopup(): Promise<void> {
   try { await sendRuntime({ type: "OPEN_POPUP" }); }
-  catch { toast("Click the Membrane toolbar icon", "error"); }
+  catch { toast("Click the Relay toolbar icon", "error"); }
 }
 
-function injectMembraneControls(): void {
+function injectRelayControls(): void {
   if (!isSupportedHost()) return;
   const input = findInput();
   if (!input) return;
-  const container = (document.getElementById(MEMBRANE_CONTROLS_ID) as HTMLDivElement | null) || createMembraneControls();
-  placeMembraneControls(container, input);
+  const container = (document.getElementById(RELAY_CONTROLS_ID) as HTMLDivElement | null) || createRelayControls();
+  placeRelayControls(container, input);
 }
 
 function findInput(): HTMLElement | null {
@@ -333,17 +338,27 @@ chrome.runtime.onMessage.addListener((request: RuntimeRequest, _sender, sendResp
 });
 
 loadStyles();
-injectMembraneControls();
 
-let membraneRenderTimer: number | undefined;
-function scheduleMembraneRender(): void {
-  window.clearTimeout(membraneRenderTimer);
-  membraneRenderTimer = window.setTimeout(injectMembraneControls, 150);
+const RETRY_DELAYS = [0, 500, 1500, 3000];
+
+function tryInjectWithRetry(attempt = 0): void {
+  injectRelayControls();
+  if (!document.getElementById(RELAY_CONTROLS_ID) && attempt < RETRY_DELAYS.length - 1) {
+    window.setTimeout(() => tryInjectWithRetry(attempt + 1), RETRY_DELAYS[attempt + 1]);
+  }
 }
 
-const composerObserver = new MutationObserver(scheduleMembraneRender);
+tryInjectWithRetry();
+
+let relayRenderTimer: number | undefined;
+function scheduleRelayRender(): void {
+  window.clearTimeout(relayRenderTimer);
+  relayRenderTimer = window.setTimeout(injectRelayControls, 150);
+}
+
+const composerObserver = new MutationObserver(scheduleRelayRender);
 composerObserver.observe(document.body, { childList: true, subtree: true });
-window.addEventListener("resize", scheduleMembraneRender);
+window.addEventListener("resize", scheduleRelayRender);
 
 async function captureVisibleChat(button?: HTMLButtonElement): Promise<void> {
   if (button) setButtonState(button, "loading");

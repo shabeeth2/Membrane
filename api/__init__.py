@@ -1,1 +1,1 @@
-"""Membrane FastAPI package."""
+"""Relay FastAPI package."""
