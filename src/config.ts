@@ -12,3 +12,16 @@ export const SUPPORTED_HOSTS = [
   "grok.com",
   "chat.mistral.ai",
 ];
+
+export const HOST_NAMES: Record<string, string> = {
+  "chatgpt.com": "ChatGPT",
+  "chat.openai.com": "ChatGPT",
+  "claude.ai": "Claude",
+  "www.perplexity.ai": "Perplexity",
+  "perplexity.ai": "Perplexity",
+  "gemini.google.com": "Gemini",
+  "bard.google.com": "Gemini",
+  "copilot.microsoft.com": "Copilot",
+  "grok.com": "Grok",
+  "chat.mistral.ai": "Mistral",
+};

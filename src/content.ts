@@ -1,4 +1,4 @@
-import { SUPPORTED_HOSTS } from "./config.js";
+import { SUPPORTED_HOSTS, HOST_NAMES } from "./config.js";
 import type { RuntimeRequest, RuntimeResponse } from "./types.js";
 
 const RELAY_CONTROLS_ID = "relay-controls";
@@ -9,15 +9,8 @@ function isSupportedHost(host = window.location.hostname): boolean {
   return SUPPORTED_HOSTS.includes(host);
 }
 
-function currentSite(host = window.location.hostname): "chatgpt" | "claude" | "perplexity" | "gemini" | "copilot" | "grok" | "mistral" | "unknown" {
-  if (host === "chatgpt.com" || host === "chat.openai.com") return "chatgpt";
-  if (host === "claude.ai") return "claude";
-  if (host === "www.perplexity.ai" || host === "perplexity.ai") return "perplexity";
-  if (host === "gemini.google.com" || host === "bard.google.com") return "gemini";
-  if (host === "copilot.microsoft.com") return "copilot";
-  if (host === "grok.com") return "grok";
-  if (host === "chat.mistral.ai") return "mistral";
-  return "unknown";
+function currentSite(host = window.location.hostname): string {
+  return HOST_NAMES[host] ?? "unknown";
 }
 
 function loadStyles(): void {
@@ -176,14 +169,14 @@ function placeGeminiButton(container: HTMLElement, input: HTMLElement): boolean 
 
 function placeByNativeControls(container: HTMLElement, input: HTMLElement): boolean {
   const site = currentSite();
-  if (site === "gemini" && placeGeminiButton(container, input)) return true;
+  if (site === "Gemini" && placeGeminiButton(container, input)) return true;
   const siteSelectors: Record<string, string[]> = {
-    chatgpt: ['[data-testid="composer-footer-actions"]', '[data-testid*="composer"] [class*="items-center"]'],
-    claude: ['[data-testid*="composer"] [class*="button"]', '[class*="composer"] [class*="actions"]'],
-    perplexity: ['main form [class*="items-center"]', '[class*="composer"] [class*="items-center"]'],
-    copilot: ['form [class*="actions"]', 'form [class*="toolbar"]', '[class*="composer"] [class*="actions"]'],
-    grok: ['form [class*="items-center"]', '[class*="composer"] [class*="items-center"]'],
-    mistral: ['form [class*="items-center"]', '[class*="composer"] [class*="actions"]'],
+    ChatGPT: ['[data-testid="composer-footer-actions"]', '[data-testid*="composer"] [class*="items-center"]'],
+    Claude: ['[data-testid*="composer"] [class*="button"]', '[class*="composer"] [class*="actions"]'],
+    Perplexity: ['main form [class*="items-center"]', '[class*="composer"] [class*="items-center"]'],
+    Copilot: ['form [class*="actions"]', 'form [class*="toolbar"]', '[class*="composer"] [class*="actions"]'],
+    Grok: ['form [class*="items-center"]', '[class*="composer"] [class*="items-center"]'],
+    Mistral: ['form [class*="items-center"]', '[class*="composer"] [class*="actions"]'],
     unknown: [],
   };
   const parentContainer = closestVisible(input, ["form", '[data-testid*="composer"]', '[data-testid*="prompt"]', '[class*="composer"]', '[class*="prompt"]', '[class*="input"]']) || input.parentElement;

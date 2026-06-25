@@ -2,18 +2,20 @@ from __future__ import annotations
 
 import logging
 import os
-from typing import Any
 
 import httpx
 from dotenv import load_dotenv
 from fastapi import FastAPI, Header, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from supabase import create_client
 
 from api.core import (
     cleanup_prompt,
     content_hash,
+    db_find_duplicate,
+    db_get_context,
+    db_insert_context,
+    db_list_contexts,
     parse_cleanup_output,
     require_client_id,
     truncate_raw_chat,
@@ -73,11 +75,6 @@ def require_env() -> dict[str, str]:
     return values
 
 
-def supabase_client() -> Any:
-    env = require_env()
-    return create_client(env["SUPABASE_URL"], env["SUPABASE_SERVICE_ROLE_KEY"])
-
-
 async def cleanup_with_openrouter(raw_chat: str, truncated: bool) -> str:
     env = require_env()
     payload = {
@@ -131,7 +128,7 @@ def health() -> dict[str, bool]:
 async def capture_context(
     request: CaptureRequest,
     x_relay_client_id: str | None = Header(default=None),
-) -> dict[str, Any]:
+) -> dict:
     try:
         client_id = require_client_id(x_relay_client_id)
         raw_chat = validate_raw_chat(request.raw_chat)
@@ -144,37 +141,16 @@ async def capture_context(
     cleaned = await cleanup_with_openrouter(retained_chat, truncated)
     title, content = parse_cleanup_output(cleaned)
     digest = content_hash(content)
-    db = supabase_client()
 
-    existing = (
-        db.table("contexts")
-        .select("id,title,created_at")
-        .eq("client_id", client_id)
-        .eq("content_hash", digest)
-        .limit(1)
-        .execute()
-    )
-    if existing.data:
-        row = existing.data[0]
+    existing = db_find_duplicate(client_id, digest)
+    if existing:
         logger.info("capture deduped")
-        return {**row, "deduped": True, "truncated": truncated}
+        return {**existing, "deduped": True, "truncated": truncated}
 
-    inserted = (
-        db.table("contexts")
-        .insert(
-            {
-                "client_id": client_id,
-                "title": title,
-                "content": content,
-                "content_hash": digest,
-            }
-        )
-        .execute()
-    )
-    if not inserted.data:
+    row = db_insert_context(client_id, title, content, digest)
+    if not row:
         raise HTTPException(status_code=500, detail="Database insert failed")
 
-    row = inserted.data[0]
     logger.info("capture inserted")
     return {**row, "deduped": False, "truncated": truncated}
 
@@ -182,43 +158,26 @@ async def capture_context(
 @app.get("/list-contexts")
 def list_contexts(
     x_relay_client_id: str | None = Header(default=None),
-  ) -> list[dict[str, Any]]:
+) -> list[dict]:
     try:
         client_id = require_client_id(x_relay_client_id)
     except ValueError as exc:
         raise HTTPException(status_code=401, detail=str(exc)) from exc
 
-    db = supabase_client()
-    res = (
-        db.table("contexts")
-        .select("id,title,created_at")
-        .eq("client_id", client_id)
-        .order("created_at", desc=True)
-        .limit(20)
-        .execute()
-    )
-    return res.data or []
+    return db_list_contexts(client_id)
 
 
 @app.get("/get-context/{context_id}")
 def get_context(
     context_id: int,
     x_relay_client_id: str | None = Header(default=None),
-  ) -> dict[str, Any]:
+) -> dict:
     try:
         client_id = require_client_id(x_relay_client_id)
     except ValueError as exc:
         raise HTTPException(status_code=401, detail=str(exc)) from exc
 
-    db = supabase_client()
-    res = (
-        db.table("contexts")
-        .select("id,title,content")
-        .eq("client_id", client_id)
-        .eq("id", context_id)
-        .limit(1)
-        .execute()
-    )
-    if not res.data:
+    row = db_get_context(client_id, context_id)
+    if not row:
         raise HTTPException(status_code=404, detail="Context not found")
-    return res.data[0]
+    return row

@@ -2,18 +2,21 @@ from __future__ import annotations
 
 import json
 import logging
-from typing import Any
 
 from mcp.server.fastmcp import FastMCP
 
 from api.core import (
     content_hash,
+    db_find_duplicate,
+    db_get_context,
+    db_insert_context,
+    db_list_contexts,
     parse_cleanup_output,
     require_client_id,
     truncate_raw_chat,
     validate_raw_chat,
 )
-from api.index import cleanup_with_openrouter, supabase_client
+from api.index import cleanup_with_openrouter
 
 logger = logging.getLogger("relay.mcp")
 
@@ -28,16 +31,7 @@ def list_contexts(client_id: str) -> str:
         client_id: The client identifier (hex string from the Relay extension).
     """
     cid = require_client_id(client_id)
-    db = supabase_client()
-    res = (
-        db.table("contexts")
-        .select("id,title,created_at")
-        .eq("client_id", cid)
-        .order("created_at", desc=True)
-        .limit(20)
-        .execute()
-    )
-    return json.dumps(res.data or [])
+    return json.dumps(db_list_contexts(cid))
 
 
 @mcp.tool()
@@ -49,18 +43,10 @@ def get_context(client_id: str, context_id: int) -> str:
         context_id: The numeric id of the context to retrieve.
     """
     cid = require_client_id(client_id)
-    db = supabase_client()
-    res = (
-        db.table("contexts")
-        .select("id,title,content")
-        .eq("client_id", cid)
-        .eq("id", context_id)
-        .limit(1)
-        .execute()
-    )
-    if not res.data:
+    row = db_get_context(cid, context_id)
+    if not row:
         return json.dumps({"error": "Context not found"})
-    return json.dumps(res.data[0])
+    return json.dumps(row)
 
 
 @mcp.tool()
@@ -78,70 +64,15 @@ async def capture_context(client_id: str, raw_chat: str) -> str:
     cleaned = await cleanup_with_openrouter(retained, truncated)
     title, content = parse_cleanup_output(cleaned)
     digest = content_hash(content)
-    db = supabase_client()
 
-    existing = (
-        db.table("contexts")
-        .select("id,title,created_at")
-        .eq("client_id", cid)
-        .eq("content_hash", digest)
-        .limit(1)
-        .execute()
-    )
-    if existing.data:
-        row = existing.data[0]
+    existing = db_find_duplicate(cid, digest)
+    if existing:
         logger.info("mcp capture deduped")
-        return json.dumps({**row, "deduped": True, "truncated": truncated})
+        return json.dumps({**existing, "deduped": True, "truncated": truncated})
 
-    inserted = (
-        db.table("contexts")
-        .insert(
-            {
-                "client_id": cid,
-                "title": title,
-                "content": content,
-                "content_hash": digest,
-            }
-        )
-        .execute()
-    )
-    if not inserted.data:
+    row = db_insert_context(cid, title, content, digest)
+    if not row:
         return json.dumps({"error": "Database insert failed"})
 
-    row = inserted.data[0]
     logger.info("mcp capture inserted")
     return json.dumps({**row, "deduped": False, "truncated": truncated})
-
-
-@mcp.resource("relay://contexts")
-def get_contexts_resource() -> str:
-    """List all saved Relay contexts (latest 20, newest first). Uses a default client scope."""
-    db = supabase_client()
-    res = (
-        db.table("contexts")
-        .select("id,title,created_at")
-        .order("created_at", desc=True)
-        .limit(20)
-        .execute()
-    )
-    return json.dumps(res.data or [])
-
-
-@mcp.resource("relay://context/{context_id}")
-def get_context_resource(context_id: int) -> str:
-    """Get a specific Relay context by its id.
-
-    Args:
-        context_id: The numeric id of the context to retrieve.
-    """
-    db = supabase_client()
-    res = (
-        db.table("contexts")
-        .select("id,title,content")
-        .eq("id", context_id)
-        .limit(1)
-        .execute()
-    )
-    if not res.data:
-        return json.dumps({"error": "Context not found"})
-    return json.dumps(res.data[0])

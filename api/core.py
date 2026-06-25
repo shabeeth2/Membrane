@@ -1,8 +1,11 @@
 from __future__ import annotations
 
 import hashlib
+import os
 import re
 from datetime import datetime, timezone
+
+from supabase import create_client
 
 RAW_CHAT_LIMIT = 60_000
 RAW_CHAT_HEAD = 10_000
@@ -95,3 +98,78 @@ def fallback_title(now: datetime | None = None) -> str:
 
 def content_hash(content: str) -> str:
     return hashlib.sha256(content.encode("utf-8")).hexdigest()
+
+
+# ── Database helpers ──
+
+_supabase_client = None
+
+
+def get_supabase():
+    global _supabase_client
+    if _supabase_client is None:
+        url = os.getenv("SUPABASE_URL", "")
+        key = os.getenv("SUPABASE_SERVICE_ROLE_KEY", "")
+        if not url or not key:
+            raise RuntimeError("Supabase not configured")
+        _supabase_client = create_client(url, key)
+    return _supabase_client
+
+
+def db_list_contexts(client_id: str, limit: int = 20) -> list[dict]:
+    db = get_supabase()
+    return (
+        db.table("contexts")
+        .select("id,title,created_at")
+        .eq("client_id", client_id)
+        .order("created_at", desc=True)
+        .limit(limit)
+        .execute()
+        .data
+        or []
+    )
+
+
+def db_get_context(client_id: str, context_id: int) -> dict | None:
+    db = get_supabase()
+    res = (
+        db.table("contexts")
+        .select("id,title,content")
+        .eq("client_id", client_id)
+        .eq("id", context_id)
+        .limit(1)
+        .execute()
+    )
+    return res.data[0] if res.data else None
+
+
+def db_find_duplicate(client_id: str, digest: str) -> dict | None:
+    db = get_supabase()
+    res = (
+        db.table("contexts")
+        .select("id,title,created_at")
+        .eq("client_id", client_id)
+        .eq("content_hash", digest)
+        .limit(1)
+        .execute()
+    )
+    return res.data[0] if res.data else None
+
+
+def db_insert_context(
+    client_id: str, title: str, content: str, digest: str
+) -> dict | None:
+    db = get_supabase()
+    res = (
+        db.table("contexts")
+        .insert(
+            {
+                "client_id": client_id,
+                "title": title,
+                "content": content,
+                "content_hash": digest,
+            }
+        )
+        .execute()
+    )
+    return res.data[0] if res.data else None

@@ -1,7 +1,5 @@
-import { SUPPORTED_HOSTS } from "./config.js";
+import { SUPPORTED_HOSTS, HOST_NAMES } from "./config.js";
 import type { ContextDetail, ContextSummary, RuntimeResponse } from "./types.js";
-
-type StatusTone = "info" | "success" | "error";
 
 // DOM Elements
 const envText = document.getElementById("env-text") as HTMLElement;
@@ -75,33 +73,10 @@ async function detectEnvironment(): Promise<void> {
   try {
     const url = new URL(tab.url);
     const host = url.hostname;
-    let platform = "Unsupported";
-    let supported = false;
+    const name = HOST_NAMES[host];
+    const supported = SUPPORTED_HOSTS.includes(host);
 
-    if (host === "chatgpt.com" || host === "chat.openai.com") {
-      platform = "ChatGPT Detected";
-      supported = true;
-    } else if (host === "claude.ai") {
-      platform = "Claude Detected";
-      supported = true;
-    } else if (host === "www.perplexity.ai" || host === "perplexity.ai") {
-      platform = "Perplexity Detected";
-      supported = true;
-    } else if (host === "gemini.google.com" || host === "bard.google.com") {
-      platform = "Gemini Detected";
-      supported = true;
-    } else if (host === "copilot.microsoft.com") {
-      platform = "Copilot Detected";
-      supported = true;
-    } else if (host === "grok.com") {
-      platform = "Grok Detected";
-      supported = true;
-    } else if (host === "chat.mistral.ai") {
-      platform = "Mistral Detected";
-      supported = true;
-    }
-
-    envText.textContent = platform;
+    envText.textContent = name ? `${name} Detected` : "Unsupported";
 
     if (supported) {
       statusLabel.textContent = "HOOK ACTIVE";
