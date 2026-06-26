@@ -5,6 +5,7 @@ import os
 import re
 from datetime import datetime, timezone
 
+import httpx
 from supabase import create_client
 
 RAW_CHAT_LIMIT = 60_000
@@ -98,6 +99,50 @@ def fallback_title(now: datetime | None = None) -> str:
 
 def content_hash(content: str) -> str:
     return hashlib.sha256(content.encode("utf-8")).hexdigest()
+
+
+class LLMError(Exception):
+    pass
+
+
+async def llm_cleanup(raw_chat: str, truncated: bool) -> str:
+    api_key = os.getenv("OPENROUTER_API_KEY", "")
+    model = os.getenv("LLM_MODEL", "openai/gpt-4o-mini")
+    api_base = os.getenv("LLM_API_BASE", "https://openrouter.ai/api/v1")
+
+    if not api_key:
+        raise LLMError("LLM API key not configured")
+
+    payload = {
+        "model": model,
+        "messages": [{"role": "user", "content": cleanup_prompt(raw_chat, truncated)}],
+        "temperature": 0.1,
+    }
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json",
+    }
+
+    try:
+        async with httpx.AsyncClient(timeout=12.0) as client:
+            res = await client.post(
+                f"{api_base}/chat/completions",
+                json=payload,
+                headers=headers,
+            )
+    except httpx.TimeoutException as exc:
+        raise LLMError("LLM request timed out") from exc
+    except httpx.HTTPError as exc:
+        raise LLMError("LLM request failed") from exc
+
+    if res.status_code >= 400:
+        raise LLMError(f"LLM returned status {res.status_code}")
+
+    data = res.json()
+    try:
+        return data["choices"][0]["message"]["content"]
+    except (KeyError, IndexError, TypeError) as exc:
+        raise LLMError("Invalid LLM response format") from exc
 
 
 # ── Database helpers ──

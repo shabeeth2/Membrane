@@ -1,75 +1,58 @@
-/* ── Inline controls (placed near input) ── */
+/* ── Relay Trigger Icon (injected into chat pages) ── */
 
-.relay-controls {
-  display: inline-flex;
-  align-items: center;
-  gap: 2px;
-  flex-shrink: 0;
+.relay-trigger {
   position: relative;
   z-index: 2147483647;
+  pointer-events: auto;
+  flex-shrink: 0;
 }
 
-.relay-btn--icon {
-  z-index: 2147483647;
+.relay-trigger-icon {
   width: 28px;
   height: 28px;
-  display: inline-flex;
+  border-radius: 50%;
+  background: rgba(0, 230, 128, 0.12);
+  border: 1px solid rgba(0, 230, 128, 0.25);
+  display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0;
-  border: 1px solid rgba(45, 212, 191, 0.25);
-  border-radius: 7px;
-  background: rgba(255, 255, 255, 0.75);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  box-shadow: 0 2px 12px rgba(15, 118, 110, 0.08);
   cursor: pointer;
-  transition: all 160ms ease;
-  color: #0f766e;
+  transition: all 200ms ease;
+  color: #00e680;
 }
 
-.relay-btn--icon:hover {
-  background: rgba(204, 251, 241, 0.85);
-  border-color: rgba(94, 234, 212, 0.5);
-  box-shadow: 0 4px 16px rgba(15, 118, 110, 0.12);
+.relay-trigger-icon:hover {
+  background: rgba(0, 230, 128, 0.22);
+  border-color: rgba(0, 230, 128, 0.45);
+  box-shadow: 0 0 12px rgba(0, 230, 128, 0.25);
+  transform: scale(1.08);
 }
 
-.relay-btn--icon:active {
-  transform: scale(0.93);
+.relay-trigger-icon:active {
+  transform: scale(0.94);
+  background: rgba(0, 230, 128, 0.3);
 }
 
-.relay-btn--icon:focus-visible {
-  outline: 2px solid #14b8a6;
+.relay-trigger-icon:focus-visible {
+  outline: 2px solid #00e680;
   outline-offset: 2px;
 }
 
-.relay-btn--icon:disabled {
-  opacity: 0.55;
-  cursor: not-allowed;
-  transform: none;
-}
-
-.relay-btn--icon.is-loading {
-  opacity: 0.6;
+.relay-trigger.is-loading .relay-trigger-icon {
+  opacity: 0.5;
   cursor: wait;
-  animation: relay-pulse 1.2s ease-in-out infinite;
+  animation: relay-icon-pulse 1.2s ease-in-out infinite;
 }
 
-.relay-btn--icon svg {
+.relay-trigger-icon svg {
   width: 16px;
   height: 16px;
   display: block;
   pointer-events: none;
 }
 
-.relay-btn--icon img {
-  width: 16px;
-  height: 16px;
-  display: block;
-  pointer-events: none;
-}
+/* ── Toast notification ── */
 
-/* Toast notification */
 .relay-toast {
   position: fixed;
   right: 18px;
@@ -143,7 +126,7 @@
   to { opacity: 0; transform: translateX(12px); }
 }
 
-@keyframes relay-pulse {
+@keyframes relay-icon-pulse {
   0%, 100% { opacity: 0.7; }
-  50% { opacity: 0.5; }
+  50% { opacity: 0.4; }
 }

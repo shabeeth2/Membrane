@@ -21,3 +21,25 @@ if (fs.existsSync(assetsDir)) {
     }
   }
 }
+
+// Bundle content.js: inline config imports so content script doesn't need ES modules
+const configPath = path.join(distDir, "config.js");
+const contentPath = path.join(distDir, "content.js");
+
+if (fs.existsSync(configPath) && fs.existsSync(contentPath)) {
+  const configSrc = fs.readFileSync(configPath, "utf-8");
+  const contentSrc = fs.readFileSync(contentPath, "utf-8");
+
+  // Extract SUPPORTED_HOSTS and HOST_NAMES from config.js
+  const hostsMatch = configSrc.match(/export const SUPPORTED_HOSTS = (\[[\s\S]*?\]);/);
+  const namesMatch = configSrc.match(/export const HOST_NAMES = (\{[\s\S]*?\});/);
+
+  if (hostsMatch && namesMatch) {
+    const bundled = contentSrc
+      .replace(/import \{ SUPPORTED_HOSTS, HOST_NAMES \} from "\.\/config\.js";\n?/, "")
+      .replace(/^/, `const SUPPORTED_HOSTS = ${hostsMatch[1]};\nconst HOST_NAMES = ${namesMatch[1]};\n`);
+
+    fs.writeFileSync(contentPath, bundled, "utf-8");
+    console.log("Bundled content.js (inlined config)");
+  }
+}

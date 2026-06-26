@@ -1,6 +1,6 @@
 # Relay
 
-Chrome extension (MV3) + FastAPI backend. Captures chat context from AI chat tools, cleans it via OpenRouter (GPT-4o-mini), stores in Supabase, and injects into other AI chats.
+Chrome extension (MV3) + FastAPI backend. Captures chat context from AI chat tools, cleans it via LLM (configurable provider), stores in Supabase, and injects into other AI chats.
 
 ## Architecture
 
@@ -8,12 +8,12 @@ Chrome extension (MV3) + FastAPI backend. Captures chat context from AI chat too
 - `api/` — Python FastAPI backend (uvicorn), routes in `api/index.py`, core logic in `api/core.py`
 - `extension/` — static assets (`manifest.json`, `popup.html`, `popup.css`, `injected.css`, `assets/`) copied to `dist/` at build
 - `tests/` — Python unittest tests for `api/core.py`
-- `scripts/run_backend.py` — launches uvicorn on `127.0.0.1:8000`
+- `scripts/start-backend.py` — launches uvicorn on `127.0.0.1:8000`
 - `scripts/copy-static.js` — copies static files + `assets/` to `dist/` after `tsc`
 
 **Supported hosts** (10 total): `chatgpt.com`, `chat.openai.com`, `claude.ai`, `www.perplexity.ai`, `perplexity.ai`, `gemini.google.com`, `bard.google.com`, `copilot.microsoft.com`, `grok.com`, `chat.mistral.ai`
 
-**Flow:** content script scrapes chat text → `POST /capture-context` with `X-Relay-Client-Id` header → backend sends to OpenRouter for cleanup → stores result in Supabase (deduped by SHA-256 hash).
+**Flow:** content script scrapes chat text → `POST /capture-context` with `X-Relay-Client-Id` header → backend sends to LLM for cleanup → stores result in Supabase (deduped by SHA-256 hash).
 
 ## Commands
 
@@ -32,8 +32,7 @@ Chrome extension (MV3) + FastAPI backend. Captures chat context from AI chat too
 - **Dependencies:** `pip install -r requirements.txt` — FastAPI, httpx, supabase, uvicorn, python-dotenv, pydantic
 - **Backend CORS:** Reads `ALLOWED_EXTENSION_ORIGINS` (comma-separated) from `.env` + allows localhost regex
 - **Chat truncation:** Raw chat >60K chars → head 10K + tail 50K with a mid-truncation note
-- **OpenRouter timeout:** 12s (HTTP 504 on timeout, 502 on failures)
-- **Error bundling:** All OpenRouter 4xx/5xx status codes → HTTP 502
+- **LLM timeout:** 12s (HTTP 502 on timeout/failures)
 - **Testing:** Python `unittest` only (no pytest) — `npm test` runs `unittest discover -s tests`
 - **No linter/formatter** configured — just `tsc` for TS and `py_compile` for Python
 - **No dev watch** — changes require `npm run build` + manual extension reload in `chrome://extensions`
@@ -45,7 +44,8 @@ Chrome extension (MV3) + FastAPI backend. Captures chat context from AI chat too
 SUPABASE_URL=
 SUPABASE_SERVICE_ROLE_KEY=
 OPENROUTER_API_KEY=
-OPENROUTER_MODEL=openai/gpt-4o-mini
+LLM_API_BASE=https://openrouter.ai/api/v1
+LLM_MODEL=openai/gpt-4o-mini
 ALLOWED_EXTENSION_ORIGINS=chrome-extension://<id>
 ```
 

@@ -6,17 +6,18 @@ import logging
 from mcp.server.fastmcp import FastMCP
 
 from api.core import (
+    LLMError,
     content_hash,
     db_find_duplicate,
     db_get_context,
     db_insert_context,
     db_list_contexts,
+    llm_cleanup,
     parse_cleanup_output,
     require_client_id,
     truncate_raw_chat,
     validate_raw_chat,
 )
-from api.index import cleanup_with_openrouter
 
 logger = logging.getLogger("relay.mcp")
 
@@ -51,7 +52,7 @@ def get_context(client_id: str, context_id: int) -> str:
 
 @mcp.tool()
 async def capture_context(client_id: str, raw_chat: str) -> str:
-    """Capture a new context from raw AI chat text. The text is sent to OpenRouter for cleanup, deduped by content hash, and stored in Supabase.
+    """Capture a new context from raw AI chat text. The text is sent to LLM for cleanup, deduped by content hash, and stored in Supabase.
 
     Args:
         client_id: The client identifier (hex string from the Relay extension).
@@ -61,7 +62,12 @@ async def capture_context(client_id: str, raw_chat: str) -> str:
     validated = validate_raw_chat(raw_chat)
     retained, truncated = truncate_raw_chat(validated)
     logger.info("mcp capture raw_length=%s truncated=%s", len(validated), truncated)
-    cleaned = await cleanup_with_openrouter(retained, truncated)
+
+    try:
+        cleaned = await llm_cleanup(retained, truncated)
+    except LLMError as exc:
+        return json.dumps({"error": str(exc)})
+
     title, content = parse_cleanup_output(cleaned)
     digest = content_hash(content)
 

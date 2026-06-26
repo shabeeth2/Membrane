@@ -1,8 +1,7 @@
 import { SUPPORTED_HOSTS, HOST_NAMES } from "./config.js";
 import type { RuntimeRequest, RuntimeResponse } from "./types.js";
 
-const RELAY_CONTROLS_ID = "relay-controls";
-const IMPORT_BUTTON_ID = "relay-import-context";
+const RELAY_TRIGGER_ID = "relay-trigger";
 const MIN_CAPTURE_CHARS = 100;
 
 function isSupportedHost(host = window.location.hostname): boolean {
@@ -41,9 +40,10 @@ function toast(message: string, tone: "neutral" | "success" | "error" = "neutral
   window.setTimeout(() => el.remove(), 2700);
 }
 
-function setButtonState(button: HTMLButtonElement, state: "idle" | "loading"): void {
-  button.classList.toggle("is-loading", state === "loading");
-  button.disabled = state === "loading";
+function setButtonState(state: "idle" | "loading"): void {
+  const trigger = document.getElementById(RELAY_TRIGGER_ID);
+  if (!trigger) return;
+  trigger.classList.toggle("is-loading", state === "loading");
 }
 
 function visibleText(element: Element): string {
@@ -76,13 +76,13 @@ function scrapeChat(): string {
   const host = window.location.hostname;
   let text = "";
   const site = currentSite(host);
-  if (site === "chatgpt") text = extractBySelectors(['[data-testid^="conversation-turn-"]', "[data-message-author-role]", "main article"]);
-  else if (site === "claude") text = extractBySelectors(['[data-testid*="message"]', '[data-test-id*="message"]', "main [class*='message']", "main"]);
-  else if (site === "perplexity") text = extractBySelectors(["main [data-testid]", "main article", "main [class*='answer']", "main"]);
-  else if (site === "gemini") text = extractBySelectors(["message-content", "model-response", "user-query", "chat-window [class*='message']", "main"]);
-  else if (site === "copilot") text = extractBySelectors(['[data-content="conversation"]', '[data-testid*="message"]', "cib-message", "main [class*='message']", "main"]);
-  else if (site === "grok") text = extractBySelectors(['[data-testid*="message"]', "main [class*='message']", "main article", "main"]);
-  else if (site === "mistral") text = extractBySelectors(['[data-testid*="message"]', "main [class*='message']", "main article", "main"]);
+  if (site === "ChatGPT") text = extractBySelectors(['[data-testid^="conversation-turn-"]', "[data-message-author-role]", "main article"]);
+  else if (site === "Claude") text = extractBySelectors(['[data-testid*="message"]', '[data-test-id*="message"]', "main [class*='message']", "main"]);
+  else if (site === "Perplexity") text = extractBySelectors(["main [data-testid]", "main article", "main [class*='answer']", "main"]);
+  else if (site === "Gemini") text = extractBySelectors(["message-content", "model-response", "user-query", "chat-window [class*='message']", "main"]);
+  else if (site === "Copilot") text = extractBySelectors(['[data-content="conversation"]', '[data-testid*="message"]', "cib-message", "main [class*='message']", "main"]);
+  else if (site === "Grok") text = extractBySelectors(['[data-testid*="message"]', "main [class*='message']", "main article", "main"]);
+  else if (site === "Mistral") text = extractBySelectors(['[data-testid*="message"]', "main [class*='message']", "main article", "main"]);
   if (text.length < MIN_CAPTURE_CHARS) text = genericMainText();
   return text.trim();
 }
@@ -120,27 +120,51 @@ function closestVisible(input: HTMLElement, selectors: string[]): HTMLElement | 
   return null;
 }
 
-function evaluateXPath(path: string): HTMLElement | null {
-  const result = document.evaluate(path, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
-  return visibleElement(result.singleNodeValue as Element | null);
+function containsRelayTrigger(element: HTMLElement): boolean {
+  return Boolean(element.querySelector(`#${RELAY_TRIGGER_ID}`));
 }
 
-function containsRelayControls(element: HTMLElement): boolean {
-  return Boolean(element.querySelector(`#${RELAY_CONTROLS_ID}`));
-}
+// Per-site insertion points: [toolbarSelector, insertBeforeSelector?]
+const SITE_INSERT_POINTS: Record<string, [string, string?]> = {
+  ChatGPT: ['form[class*="composer"]', 'button[aria-label="Start dictation"], button[aria-label="Send"]'],
+  Gemini: ['input-area-v2 [class*="actions"]', '[aria-label="Microphone"], [data-testid="microphone-button"]'],
+  Claude: ['[data-testid*="composer"] [class*="button"]', 'button[aria-label="Send Message"]'],
+  Perplexity: ['main form [class*="items-center"]', 'button[aria-label="Submit"]'],
+  Copilot: ['form [class*="actions"]', 'button[aria-label="Send"]'],
+  Grok: ['form', 'button[type="submit"], button[aria-label*="Send"]'],
+  Mistral: ['form [class*="items-center"]', 'button[type="submit"]'],
+};
 
-function resetImportButtonPlacement(element: HTMLElement): void {
-  Object.assign(element.style, { position: "", inset: "", right: "", bottom: "", margin: "", transform: "" });
-}
+function placeRelayTrigger(container: HTMLElement, input: HTMLElement): void {
+  const site = currentSite();
+  const insertPoint = SITE_INSERT_POINTS[site];
 
-function attachInFlow(container: HTMLElement, target: HTMLElement, before: Element | null = null): boolean {
-  if (target === container) return false;
-  if (target.contains(container)) { resetImportButtonPlacement(container); return true; }
-  if (containsRelayControls(target)) return false;
-  resetImportButtonPlacement(container);
-  if (before && before.parentElement === target) target.insertBefore(container, before);
-  else if (!target.contains(container)) target.appendChild(container);
-  return true;
+  if (insertPoint) {
+    const [toolbarSelector, beforeSelector] = insertPoint;
+    const toolbar = firstVisible([toolbarSelector]);
+    if (toolbar && !containsRelayTrigger(toolbar as HTMLElement)) {
+      if (beforeSelector) {
+        const beforeBtn = toolbar.querySelector(beforeSelector);
+        if (beforeBtn && toolbar.contains(beforeBtn)) {
+          beforeBtn.parentElement!.insertBefore(container, beforeBtn);
+          return;
+        }
+      }
+      toolbar.appendChild(container);
+      return;
+    }
+  }
+
+  const parentContainer = closestVisible(input, ["form", '[data-testid*="composer"]', '[data-testid*="prompt"]', '[class*="composer"]', '[class*="prompt"]', '[class*="input"]']) || input.parentElement;
+  if (parentContainer) {
+    const actionRow = firstVisible(['[class*="actions"]', '[class*="toolbar"]', '[class*="footer"]'], parentContainer);
+    if (actionRow && !containsRelayTrigger(actionRow as HTMLElement)) {
+      (actionRow as HTMLElement).appendChild(container);
+      return;
+    }
+  }
+
+  attachFixed(container, input);
 }
 
 function attachFixed(element: HTMLElement, input?: HTMLElement): void {
@@ -156,81 +180,31 @@ function attachFixed(element: HTMLElement, input?: HTMLElement): void {
   });
 }
 
-function placeGeminiButton(container: HTMLElement, input: HTMLElement): boolean {
-  const quickCompose = firstVisible(["sider-quick-compose-btn", "bard-sidenav-content sider-quick-compose-btn"]);
-  if (quickCompose?.parentElement && attachInFlow(container, quickCompose.parentElement, quickCompose)) return true;
-  const xpathTarget = evaluateXPath("/html/body/chat-app/main/side-navigation-v2/bard-sidenav-container/bard-sidenav-content/div/div/div/chat-window/div/input-container/fieldset/input-area-v2/div/div/div[1]/div/div/div/rich-textarea/sider-quick-compose-btn");
-  if (xpathTarget?.parentElement && attachInFlow(container, xpathTarget.parentElement, xpathTarget)) return true;
-  const inputArea = visibleElement(input.closest("input-container, input-area-v2, fieldset"));
-  const actionRow = firstVisible(["[class*='quick']", "[class*='action']", "[class*='toolbar']"], inputArea || document);
-  if (actionRow && attachInFlow(container, actionRow)) return true;
-  return false;
-}
-
-function placeByNativeControls(container: HTMLElement, input: HTMLElement): boolean {
-  const site = currentSite();
-  if (site === "Gemini" && placeGeminiButton(container, input)) return true;
-  const siteSelectors: Record<string, string[]> = {
-    ChatGPT: ['[data-testid="composer-footer-actions"]', '[data-testid*="composer"] [class*="items-center"]'],
-    Claude: ['[data-testid*="composer"] [class*="button"]', '[class*="composer"] [class*="actions"]'],
-    Perplexity: ['main form [class*="items-center"]', '[class*="composer"] [class*="items-center"]'],
-    Copilot: ['form [class*="actions"]', 'form [class*="toolbar"]', '[class*="composer"] [class*="actions"]'],
-    Grok: ['form [class*="items-center"]', '[class*="composer"] [class*="items-center"]'],
-    Mistral: ['form [class*="items-center"]', '[class*="composer"] [class*="actions"]'],
-    unknown: [],
-  };
-  const parentContainer = closestVisible(input, ["form", '[data-testid*="composer"]', '[data-testid*="prompt"]', '[class*="composer"]', '[class*="prompt"]', '[class*="input"]']) || input.parentElement;
-  const actionRow = firstVisible(siteSelectors[site] || [], parentContainer || document);
-  if (actionRow && attachInFlow(container, actionRow)) return true;
-  if (parentContainer && attachInFlow(container, parentContainer)) {
-    const style = window.getComputedStyle(parentContainer);
-    if (style.display !== "flex" && style.display !== "inline-flex") container.style.marginLeft = "8px";
-    return true;
-  }
-  return false;
-}
-
-function placeRelayControls(container: HTMLElement, input: HTMLElement): void {
-  if (placeByNativeControls(container, input)) {
-    // Verify the placed container is actually visible; if clipped, fall back to fixed
-    if (!visibleElement(container)) attachFixed(container, input);
-    return;
-  }
-  attachFixed(container, input);
-}
-
-function createRelayControls(): HTMLDivElement {
+function createRelayTrigger(): HTMLDivElement {
   const container = document.createElement("div");
-  container.id = RELAY_CONTROLS_ID;
-  container.className = "relay-controls";
+  container.id = RELAY_TRIGGER_ID;
+  container.className = "relay-trigger";
 
-  const saveBtn = document.createElement("button");
-  saveBtn.id = "relay-save-inline";
-  saveBtn.type = "button";
-  saveBtn.className = "relay-btn--icon";
-  saveBtn.title = "Save chat context";
-  saveBtn.setAttribute("aria-label", "Save chat context");
-  saveBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>`;
-  saveBtn.addEventListener("click", (e) => {
+  const icon = document.createElement("div");
+  icon.className = "relay-trigger-icon";
+  icon.innerHTML = `<svg viewBox="0 0 24 24" width="16" height="16" fill="none"><rect x="4" y="4" width="3" height="16" rx="1.5" fill="currentColor"/><rect x="10.5" y="2" width="3" height="20" rx="1.5" fill="currentColor"/><rect x="17" y="7" width="3" height="10" rx="1.5" fill="currentColor"/><path d="M2 12h20" stroke="#00e680" stroke-width="2.5" stroke-linecap="round"/><path d="M17 8l5 4-5 4" stroke="#00e680" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+  icon.title = "Save Context";
+
+  // Click = save (70% use case)
+  icon.addEventListener("click", (e) => {
     e.preventDefault();
     e.stopPropagation();
-    void captureVisibleChat(saveBtn);
+    void captureVisibleChat();
   });
 
-  const importBtn = document.createElement("button");
-  importBtn.id = IMPORT_BUTTON_ID;
-  importBtn.type = "button";
-  importBtn.className = "relay-btn--icon";
-  importBtn.title = "Open Relay";
-  importBtn.setAttribute("aria-label", "Open Relay");
-  importBtn.innerHTML = `<svg viewBox="0 0 24 24" width="16" height="16" fill="none"><rect x="4" y="4" width="3" height="16" rx="1.5" fill="currentColor"/><rect x="10.5" y="2" width="3" height="20" rx="1.5" fill="currentColor"/><rect x="17" y="7" width="3" height="10" rx="1.5" fill="currentColor"/><path d="M2 12h20" stroke="#00e680" stroke-width="2.5" stroke-linecap="round"/><path d="M17 8l5 4-5 4" stroke="#00e680" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
-  importBtn.addEventListener("click", (e) => {
+  // Right-click = open popup to choose context (30% use case)
+  icon.addEventListener("contextmenu", (e) => {
     e.preventDefault();
     e.stopPropagation();
     void openPopup();
   });
 
-  container.append(saveBtn, importBtn);
+  container.appendChild(icon);
   return container;
 }
 
@@ -239,16 +213,17 @@ async function openPopup(): Promise<void> {
   catch { toast("Click the Relay toolbar icon", "error"); }
 }
 
-function injectRelayControls(): void {
+function injectRelayTrigger(): void {
   if (!isSupportedHost()) return;
+  const existing = document.getElementById(RELAY_TRIGGER_ID);
   const input = findInput();
   if (!input) return;
-  const container = (document.getElementById(RELAY_CONTROLS_ID) as HTMLDivElement | null) || createRelayControls();
-  placeRelayControls(container, input);
+  const container = existing || createRelayTrigger();
+  placeRelayTrigger(container, input);
 }
 
 function findInput(): HTMLElement | null {
-  const selectors = ["rich-textarea", "textarea", '[contenteditable="true"]', '[role="textbox"]', "div.ProseMirror", '[class*="ProseMirror"]', '[class*="composer"] [contenteditable]'];
+  const selectors = ["#prompt-textarea", "rich-textarea", "textarea", '[contenteditable="true"]', '[role="textbox"]', "div.ProseMirror", '[class*="ProseMirror"]', '[class*="composer"] [contenteditable]'];
   for (const selector of selectors) {
     const elements = Array.from(document.querySelectorAll<HTMLElement>(selector));
     const visible = elements.find(e => { const r = e.getBoundingClientRect(); return r.width > 0 && r.height > 0; });
@@ -335,8 +310,8 @@ loadStyles();
 const RETRY_DELAYS = [0, 500, 1500, 3000];
 
 function tryInjectWithRetry(attempt = 0): void {
-  injectRelayControls();
-  if (!document.getElementById(RELAY_CONTROLS_ID) && attempt < RETRY_DELAYS.length - 1) {
+  injectRelayTrigger();
+  if (!document.getElementById(RELAY_TRIGGER_ID) && attempt < RETRY_DELAYS.length - 1) {
     window.setTimeout(() => tryInjectWithRetry(attempt + 1), RETRY_DELAYS[attempt + 1]);
   }
 }
@@ -346,15 +321,15 @@ tryInjectWithRetry();
 let relayRenderTimer: number | undefined;
 function scheduleRelayRender(): void {
   window.clearTimeout(relayRenderTimer);
-  relayRenderTimer = window.setTimeout(injectRelayControls, 150);
+  relayRenderTimer = window.setTimeout(injectRelayTrigger, 500);
 }
 
 const composerObserver = new MutationObserver(scheduleRelayRender);
 composerObserver.observe(document.body, { childList: true, subtree: true });
 window.addEventListener("resize", scheduleRelayRender);
 
-async function captureVisibleChat(button?: HTMLButtonElement): Promise<void> {
-  if (button) setButtonState(button, "loading");
+async function captureVisibleChat(): Promise<void> {
+  setButtonState("loading");
   try {
     const rawChat = scrapeChat();
     if (rawChat.length < MIN_CAPTURE_CHARS) { toast("Could not find chat content", "error"); throw new Error("Could not find chat content"); }
@@ -364,6 +339,6 @@ async function captureVisibleChat(button?: HTMLButtonElement): Promise<void> {
     if (!(error instanceof Error && error.message === "Could not find chat content")) toast("Could not save context", "error");
     throw error;
   } finally {
-    if (button) setButtonState(button, "idle");
+    setButtonState("idle");
   }
 }
