@@ -94,74 +94,50 @@ async function sendRuntime<T>(request: RuntimeRequest): Promise<T> {
 }
 
 
-function visibleElement(element: Element | null): HTMLElement | null {
-  if (!(element instanceof HTMLElement)) return null;
-  const rect = element.getBoundingClientRect();
-  const style = window.getComputedStyle(element);
-  if (rect.width <= 0 || rect.height <= 0 || style.visibility === "hidden" || style.display === "none") return null;
-  return element;
-}
-
-function firstVisible(selectors: string[], root: ParentNode = document): HTMLElement | null {
-  for (const selector of selectors) {
-    for (const element of Array.from(root.querySelectorAll(selector))) {
-      const visible = visibleElement(element);
-      if (visible) return visible;
-    }
-  }
-  return null;
-}
-
-function closestVisible(input: HTMLElement, selectors: string[]): HTMLElement | null {
-  for (const selector of selectors) {
-    const container = visibleElement(input.closest(selector));
-    if (container) return container;
-  }
-  return null;
-}
-
-function containsRelayTrigger(element: HTMLElement): boolean {
-  return Boolean(element.querySelector(`#${RELAY_TRIGGER_ID}`));
-}
-
-// Per-site insertion points: [toolbarSelector, insertBeforeSelector?]
-const SITE_INSERT_POINTS: Record<string, [string, string?]> = {
-  ChatGPT: ['form[class*="composer"]', 'button[aria-label="Start dictation"], button[aria-label="Send"]'],
-  Gemini: ['input-area-v2 [class*="actions"]', '[aria-label="Microphone"], [data-testid="microphone-button"]'],
-  Claude: ['[data-testid*="composer"] [class*="button"]', 'button[aria-label="Send Message"]'],
-  Perplexity: ['main form [class*="items-center"]', 'button[aria-label="Submit"]'],
-  Copilot: ['form [class*="actions"]', 'button[aria-label="Send"]'],
-  Grok: ['form', 'button[type="submit"], button[aria-label*="Send"]'],
-  Mistral: ['form [class*="items-center"]', 'button[type="submit"]'],
-};
-
 function placeRelayTrigger(container: HTMLElement, input: HTMLElement): void {
-  const site = currentSite();
-  const insertPoint = SITE_INSERT_POINTS[site];
-
-  if (insertPoint) {
-    const [toolbarSelector, beforeSelector] = insertPoint;
-    const toolbar = firstVisible([toolbarSelector]);
-    if (toolbar && !containsRelayTrigger(toolbar as HTMLElement)) {
-      if (beforeSelector) {
-        const beforeBtn = toolbar.querySelector(beforeSelector);
-        if (beforeBtn && toolbar.contains(beforeBtn)) {
-          beforeBtn.parentElement!.insertBefore(container, beforeBtn);
-          return;
-        }
-      }
-      toolbar.appendChild(container);
-      return;
+  let inputBar: HTMLElement | null = null;
+  let el: HTMLElement | null = input;
+  for (let i = 0; i < 10; i++) {
+    el = el.parentElement;
+    if (!el) break;
+    const rect = el.getBoundingClientRect();
+    if (rect.width > 200 && rect.height >= 40 && rect.height <= 150) {
+      inputBar = el;
+      break;
     }
   }
 
-  const parentContainer = closestVisible(input, ["form", '[data-testid*="composer"]', '[data-testid*="prompt"]', '[class*="composer"]', '[class*="prompt"]', '[class*="input"]']) || input.parentElement;
-  if (parentContainer) {
-    const actionRow = firstVisible(['[class*="actions"]', '[class*="toolbar"]', '[class*="footer"]'], parentContainer);
-    if (actionRow && !containsRelayTrigger(actionRow as HTMLElement)) {
-      (actionRow as HTMLElement).appendChild(container);
-      return;
+  if (!inputBar) {
+    for (const form of Array.from(document.querySelectorAll("form"))) {
+      const rect = form.getBoundingClientRect();
+      if (rect.width > 200 && rect.height >= 40 && rect.height <= 150 && form.querySelectorAll("button").length > 0) {
+        inputBar = form;
+        break;
+      }
     }
+  }
+
+  if (inputBar) {
+    const rect = inputBar.getBoundingClientRect();
+
+    const buttons = inputBar.querySelectorAll("button");
+    let buttonLeft = rect.right;
+    for (const btn of Array.from(buttons)) {
+      const br = btn.getBoundingClientRect();
+      if (br.width > 0 && br.right > rect.right - 200) {
+        buttonLeft = Math.min(buttonLeft, br.left);
+      }
+    }
+
+    if (!document.body.contains(container)) document.body.appendChild(container);
+    Object.assign(container.style, {
+      position: "fixed",
+      left: `${buttonLeft - 36}px`,
+      top: `${rect.top + (rect.height / 2) - 12}px`,
+      margin: "0",
+      transform: "",
+    });
+    return;
   }
 
   attachFixed(container, input);
@@ -169,12 +145,10 @@ function placeRelayTrigger(container: HTMLElement, input: HTMLElement): void {
 
 function attachFixed(element: HTMLElement, input?: HTMLElement): void {
   if (!document.body.contains(element)) document.body.appendChild(element);
-  const inputRect = input?.getBoundingClientRect();
-  const hasRect = inputRect && inputRect.width > 0 && inputRect.height > 0;
   Object.assign(element.style, {
     position: "fixed",
-    right: hasRect ? Math.max(18, Math.round(window.innerWidth - inputRect!.right + 44)) + "px" : "18px",
-    bottom: hasRect ? Math.max(18, Math.round(window.innerHeight - inputRect!.bottom + 8)) + "px" : "80px",
+    right: "18px",
+    bottom: "144px",
     margin: "0",
     transform: "",
   });
@@ -187,7 +161,7 @@ function createRelayTrigger(): HTMLDivElement {
 
   const icon = document.createElement("div");
   icon.className = "relay-trigger-icon";
-  icon.innerHTML = `<svg viewBox="0 0 24 24" width="16" height="16" fill="none"><rect x="4" y="4" width="3" height="16" rx="1.5" fill="currentColor"/><rect x="10.5" y="2" width="3" height="20" rx="1.5" fill="currentColor"/><rect x="17" y="7" width="3" height="10" rx="1.5" fill="currentColor"/><path d="M2 12h20" stroke="#00e680" stroke-width="2.5" stroke-linecap="round"/><path d="M17 8l5 4-5 4" stroke="#00e680" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+  icon.innerHTML = `<img src="${chrome.runtime.getURL("assets/logo.png")}" width="20" height="20" alt="Relay" style="pointer-events:none;">`;
   icon.title = "Save Context";
 
   // Click = save (70% use case)

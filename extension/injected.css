@@ -5,32 +5,37 @@
   z-index: 2147483647;
   pointer-events: auto;
   flex-shrink: 0;
+  margin-left: 8px;
+  align-self: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .relay-trigger-icon {
-  width: 28px;
-  height: 28px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
-  background: rgba(0, 230, 128, 0.12);
-  border: 1px solid rgba(0, 230, 128, 0.25);
+  background: transparent;
+  border: none;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 200ms ease;
-  color: #00e680;
+  transition: all 150ms ease;
+  color: #9ca3af;
+  padding: 0;
 }
 
 .relay-trigger-icon:hover {
-  background: rgba(0, 230, 128, 0.22);
-  border-color: rgba(0, 230, 128, 0.45);
-  box-shadow: 0 0 12px rgba(0, 230, 128, 0.25);
+  color: #00e680;
+  background: transparent;
+  box-shadow: none;
   transform: scale(1.08);
 }
 
 .relay-trigger-icon:active {
   transform: scale(0.94);
-  background: rgba(0, 230, 128, 0.3);
 }
 
 .relay-trigger-icon:focus-visible {
@@ -45,8 +50,15 @@
 }
 
 .relay-trigger-icon svg {
-  width: 16px;
-  height: 16px;
+  width: 20px;
+  height: 20px;
+  display: block;
+  pointer-events: none;
+}
+
+.relay-trigger-icon img {
+  width: 20px;
+  height: 20px;
   display: block;
   pointer-events: none;
 }

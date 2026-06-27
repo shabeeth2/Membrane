@@ -14,11 +14,11 @@
   --text-primary: #e5e5e5;
   --text-secondary: #a3a3a3;
   --text-muted: #525252;
-  --brand: #00e680;
-  --brand-dark: #00331a;
-  --brand-glow: rgba(0, 230, 128, 0.15);
-  --cyan: #22d3ee;
-  --purple: #a855f7;
+  --brand: #3B82F6;
+  --brand-dark: #0f1d3d;
+  --brand-glow: rgba(59, 130, 246, 0.15);
+  --cyan: #06B6D4;
+  --purple: #8B5CF6;
   --amber: #f59e0b;
   --red: #ef4444;
 }
@@ -86,7 +86,7 @@ main::before {
 
 @keyframes float {
   0%, 100% { transform: translateY(0); box-shadow: 0 2px 12px var(--brand-glow); }
-  50% { transform: translateY(-3px); box-shadow: 0 6px 24px rgba(0, 230, 128, 0.2); }
+  50% { transform: translateY(-3px); box-shadow: 0 6px 24px rgba(59, 130, 246, 0.2); }
 }
 
 @keyframes pulse {
@@ -117,12 +117,12 @@ header {
   width: 28px;
   height: 28px;
   border-radius: 6px;
-  background: var(--brand);
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.2);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #000;
-  box-shadow: 0 0 12px rgba(0, 230, 128, 0.4);
+  box-shadow: 0 0 8px rgba(59, 130, 246, 0.2);
 }
 
 .logo-text {
@@ -241,7 +241,7 @@ header {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, rgba(0, 230, 128, 0.03), transparent);
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.03), transparent);
   opacity: 0;
   transition: opacity 0.5s ease;
 }
@@ -268,10 +268,10 @@ header {
   font-family: "SF Mono", "Consolas", "Monaco", monospace;
   font-size: 10px;
   color: var(--brand);
-  background: rgba(0, 230, 128, 0.1);
+  background: rgba(59, 130, 246, 0.1);
   padding: 2px 8px;
   border-radius: 4px;
-  border: 1px solid rgba(0, 230, 128, 0.2);
+  border: 1px solid rgba(59, 130, 246, 0.2);
 }
 
 .vault-display {
@@ -354,11 +354,11 @@ header {
   position: relative;
   overflow: hidden;
   transition: all 300ms ease;
-  box-shadow: 0 0 20px rgba(0, 230, 128, 0.2);
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.2);
 }
 
 .action-btn:hover {
-  box-shadow: 0 0 30px rgba(0, 230, 128, 0.35);
+  box-shadow: 0 0 30px rgba(59, 130, 246, 0.35);
   transform: translateY(-1px);
 }
 
@@ -514,16 +514,15 @@ kbd {
   width: 56px;
   height: 56px;
   border-radius: 16px;
-  background: rgba(0, 230, 128, 0.08);
-  border: 1px solid rgba(0, 230, 128, 0.15);
+  background: rgba(59, 130, 246, 0.08);
+  border: 1px solid rgba(59, 130, 246, 0.15);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--brand);
   animation: float 3s ease-in-out infinite;
 }
 
-.empty-icon svg {
+.empty-icon img {
   width: 28px;
   height: 28px;
 }
@@ -622,7 +621,7 @@ kbd {
 }
 
 .filter-icon.green {
-  background: rgba(0, 230, 128, 0.1);
+  background: rgba(59, 130, 246, 0.1);
   color: var(--brand);
 }
 
