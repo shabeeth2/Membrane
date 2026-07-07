@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Relay</title>
+    <meta
+      name="description"
+      content="Relay captures AI chat context, cleans it, stores it, and injects it into the next conversation."
+    >
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main class="page">
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="hero-background" aria-hidden="true"></div>
+        <div class="hero-shell">
+          <header class="topbar">
+            <a class="brand" href="#top" aria-label="Relay home">
+              <img src="/extension/assets/logo.svg" alt="" class="brand-mark">
+              <span class="brand-name">Relay</span>
+            </a>
+            <nav class="topbar-nav" aria-label="Primary">
+              <a href="#flow">Flow</a>
+              <a href="#sites">Sites</a>
+              <a href="#setup">Setup</a>
+            </nav>
+          </header>
+
+          <div class="hero-grid" id="top">
+            <div class="hero-copy">
+              <p class="eyebrow">Chrome extension + FastAPI backend</p>
+              <h1 id="hero-title">Keep context moving between AI chats without retyping the whole project.</h1>
+              <p class="lede">
+                Relay captures visible AI conversation context, cleans it through OpenRouter,
+                stores it in Supabase, and injects the saved context into the next chat.
+              </p>
+
+              <div class="hero-actions">
+                <a class="button button-primary" href="#setup">Install locally</a>
+                <a class="button button-secondary" href="#flow">See how it works</a>
+              </div>
+
+              <div class="metric-row" aria-label="Project highlights">
+                <div class="metric">
+                  <span class="metric-value">7</span>
+                  <span class="metric-label">supported chat sites</span>
+                </div>
+                <div class="metric">
+                  <span class="metric-value">1</span>
+                  <span class="metric-label">capture button per page</span>
+                </div>
+                <div class="metric">
+                  <span class="metric-value">60K</span>
+                  <span class="metric-label">raw chat truncation limit</span>
+                </div>
+              </div>
+            </div>
+
+            <aside class="hero-panel" aria-label="Product summary">
+              <div class="panel-card panel-stack">
+                <div class="panel-kicker">Current flow</div>
+                <ol class="flow-list">
+                  <li>Scrape visible chat</li>
+                  <li>Clean through OpenRouter</li>
+                  <li>Store in Supabase</li>
+                  <li>Inject into next chat</li>
+                </ol>
+              </div>
+              <div class="panel-card panel-strip">
+                <span>ChatGPT</span>
+                <span>Claude</span>
+                <span>Perplexity</span>
+                <span>Gemini</span>
+                <span>Copilot</span>
+                <span>Grok</span>
+                <span>Mistral</span>
+              </div>
+            </aside>
+          </div>
+        </div>
+      </section>
+
+      <section class="band" id="flow">
+        <div class="band-shell">
+          <div class="section-head">
+            <p class="section-kicker">Flow</p>
+            <h2>Capture once. Reuse everywhere.</h2>
+          </div>
+
+          <div class="tile-grid">
+            <article class="tile">
+              <span class="tile-index">01</span>
+              <h3>Capture</h3>
+              <p>Pick up the visible conversation from the active AI site with a page-level save button or the popup.</p>
+            </article>
+            <article class="tile">
+              <span class="tile-index">02</span>
+              <h3>Clean</h3>
+              <p>Send raw chat to the backend, normalize it with OpenRouter, and keep the important structure.</p>
+            </article>
+            <article class="tile">
+              <span class="tile-index">03</span>
+              <h3>Store</h3>
+              <p>Persist the cleaned context in Supabase with per-client dedupe by SHA-256 hash.</p>
+            </article>
+            <article class="tile">
+              <span class="tile-index">04</span>
+              <h3>Inject</h3>
+              <p>Select a saved context and push it into a new chat so the model starts from the right place.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="band band-alt" id="sites">
+        <div class="band-shell split">
+          <div class="section-head">
+            <p class="section-kicker">Sites</p>
+            <h2>Native placement on the composer, not a floating afterthought.</h2>
+          </div>
+          <div class="site-list">
+            <p>ChatGPT</p>
+            <p>Claude</p>
+            <p>Perplexity</p>
+            <p>Gemini / Bard</p>
+            <p>Copilot</p>
+            <p>Grok</p>
+            <p>Mistral</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="band" id="setup">
+        <div class="band-shell split">
+          <div class="section-head">
+            <p class="section-kicker">Setup</p>
+            <h2>Local first. Vercel ready.</h2>
+          </div>
+          <div class="setup-copy">
+            <p>
+              Build the extension, load the unpacked `dist/` folder in Chrome, and run the backend locally.
+              The landing page itself is static and can be hosted on Vercel from the repo root.
+            </p>
+            <div class="inline-cta">
+              <a class="button button-primary" href="/README.md">Open docs</a>
+              <a class="button button-secondary" href="/ARCHITECTURE.md">Read architecture</a>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>
