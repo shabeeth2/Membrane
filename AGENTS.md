@@ -5,7 +5,7 @@ Chrome extension (MV3) + FastAPI backend. Captures chat context from AI chat too
 ## Architecture
 
 - `src/` — TypeScript for the extension (compiled to `dist/` via `tsc`)
-- `api/` — Python FastAPI backend (uvicorn), routes in `api/index.py`, core logic in `api/core.py`
+- `api/` — Python FastAPI backend (uvicorn), routes in `api/index.py`, all backend logic in `api/core.py` (validation, truncation, prompts, parsing, hashing, LLM cleanup, DB helpers)
 - `extension/` — static assets (`manifest.json`, `popup.html`, `popup.css`, `injected.css`, `assets/`) copied to `dist/` at build
 - `tests/` — Python unittest tests for `api/core.py`
 - `scripts/start-backend.py` — launches uvicorn on `127.0.0.1:8000`
