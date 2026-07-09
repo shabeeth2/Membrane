@@ -29,7 +29,7 @@ Chrome extension (MV3) + FastAPI backend. Captures chat context from AI chat too
 ## Key details
 
 - **Python in venv:** All npm scripts reference `.venv\Scripts\python.exe` (Windows path). Set up with `python -m venv .venv`
-- **Dependencies:** `pip install -r requirements.txt` — FastAPI, httpx, supabase, uvicorn, python-dotenv, pydantic
+- **Dependencies:** `pip install -r requirements.txt` — FastAPI, httpx, supabase, uvicorn, python-dotenv, pydantic, mcp
 - **Backend CORS:** Reads `ALLOWED_EXTENSION_ORIGINS` (comma-separated) from `.env` + allows localhost regex
 - **Chat truncation:** Raw chat >60K chars → head 10K + tail 50K with a mid-truncation note
 - **LLM timeout:** 12s (HTTP 502 on timeout/failures)
@@ -56,11 +56,7 @@ Mounted at `/mcp` on the FastAPI backend (Streamable HTTP transport). Built with
 **Tools** (require `client_id` parameter):
 - `list_contexts` — list up to 20 contexts for a client
 - `get_context` — get full context content by id
-- `capture_context` — save new context from raw chat text (async, uses OpenRouter cleanup)
-
-**Resources:**
-- `relay://contexts` — list latest 20 contexts
-- `relay://context/{id}` — get specific context by id
+- `capture_context` — save new context from raw chat text (async, uses LLM cleanup)
 
 **Client config** (Claude Desktop, opencode, Cursor, etc.):
 ```json
